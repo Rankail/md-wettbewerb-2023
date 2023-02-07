@@ -8,6 +8,7 @@
 #include <memory>
 #include <iostream>
 #include <cmath>
+#include <exception>
 
 struct Connection;
 
@@ -63,7 +64,7 @@ enum class Wall {
 struct Connection {
 	ConnType type;
 	std::shared_ptr<Circle> other;
-	Wall wall;
+	Wall wall = Wall::LEFT;
 	double angle; //(from c1 to c2) => connection-point = c1+sin/cos(angle) * c1.r
 
 	Connection(std::shared_ptr<Circle> self, std::shared_ptr<Circle> other)
@@ -72,7 +73,7 @@ struct Connection {
 	}
 
 	Connection(Wall wall)
-		: type(ConnType::WALL), wall(wall) { }
+		: type(ConnType::WALL), wall(wall), angle(0) { }
 };
 
 static Circle leftWallDown(std::shared_ptr<Circle> c, double r) {

@@ -20,7 +20,7 @@ void Solver::readInput(const std::string& path) {
 	std::string line;
 	std::getline(file, line);
 	std::getline(file, line);
-	int space = line.find(' ');
+	size_t space = line.find(' ');
 	w = (double)std::stoi(line.substr(0, space));
 	h = (double)std::stoi(line.substr(space + 1));
 
