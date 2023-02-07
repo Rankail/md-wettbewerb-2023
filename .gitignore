@@ -1,0 +1,5 @@
+vs-cpp/.vs
+**.sln
+**.vcxproj*
+vs-cpp/bin
+vs-cpp/bin-int
