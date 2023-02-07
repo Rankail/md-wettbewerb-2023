@@ -39,7 +39,7 @@ void Solver::readInput(const std::string& path) {
 	numBlocks = 0;
 	for (CircleType& t : types) {
 		t.sizeMultiplier = t.r / min;
-		numBlocks += t.r * t.r * std::numbers::pi;
+		numBlocks += t.r * t.r * PI;
 	}
 
 }

@@ -5,11 +5,12 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <numbers>
 #include <memory>
 #include <iostream>
 #include <cmath>
 #include <stdexcept>
+
+#define PI 3.1415926535897932384626433832795028841971
 
 struct Connection;
 
