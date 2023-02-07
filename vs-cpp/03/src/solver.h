@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SOLVER_H
+#define SOLVER_H
 
 #include "utils.h"
 
@@ -21,3 +22,5 @@ private:
 	double numBlocks;
 
 };
+
+#endif

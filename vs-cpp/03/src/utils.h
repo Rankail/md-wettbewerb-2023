@@ -7,6 +7,7 @@
 #include <numbers>
 #include <memory>
 #include <iostream>
+#include <cmath>
 
 struct Connection;
 
