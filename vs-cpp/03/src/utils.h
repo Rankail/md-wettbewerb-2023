@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <fstream>
 #include <string>
@@ -8,7 +9,7 @@
 #include <memory>
 #include <iostream>
 #include <cmath>
-#include <exception>
+#include <stdexcept>
 
 struct Connection;
 
@@ -141,3 +142,5 @@ static Circle circleFromTwoCircles(std::shared_ptr<Circle> c1, std::shared_ptr<C
 	auto p = intersectionTwoCircles(c1->cx, c1->cy, c1->r + r, c2->cx, c2->cy, c2->r + r);
 	return Circle{p.x, p.y, r};
 }
+
+#endif
