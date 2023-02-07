@@ -3,18 +3,18 @@
 #include "utils.h"
 
 Solver::Solver(const std::string& file) {
-	readInput(file);
+	loaded = readInput(file);
 }
 
 Solver::~Solver() {
 }
 
-void Solver::readInput(const std::string& path) {
+bool Solver::readInput(const std::string& path) {
 	std::ifstream file;
 	file.open(path);
 	if (!file.is_open()) {
 		printf("Failed to read file!\n");
-		return;
+		return false;
 	}
 
 	std::string line;
@@ -42,27 +42,41 @@ void Solver::readInput(const std::string& path) {
 		numBlocks += t.r * t.r * PI;
 	}
 
+	return true;
 }
 
 void Solver::run() {
+	int cur = 0;
+	
+	if (!loaded) return;
 	int nextIdx = getNextType();
 
-	std::vector<std::shared_ptr<Circle>> circles = std::vector<std::shared_ptr<Circle>>();
+	circles = std::vector<std::shared_ptr<Circle>>();
 	CircleType& t = types[nextIdx];
 	std::cout << t << std::endl;
 	circles.push_back(Circle::create(t.r, t.r, t.r));
+	circles[cur]->conns.push_back(Connection(Wall::LEFT));
+	circles[cur]->conns.push_back(Connection(Wall::UP));
 	t.count++;
+	cur++;
 
 	bool fits = true;
 	while (fits) {
 		fits = false;
-		t = types[getNextType()];
+		int nextIdx = getNextType();
+		t = types[nextIdx];
 
-		std::cout << t << std::endl;
+		std::shared_ptr<Circle> c = getNextCircle(t);
+		if (c != nullptr) fits = true;
+		std::cout << c << circles.size() << std::endl;
+		circles.push_back(c);
+		types[nextIdx].count++;
+		cur++;
+	}
 
-		
-
-		break;
+	std::cout << "Result:\n";
+	for (auto& c : circles) {
+		std::cout << c << std::endl;
 	}
 }
 
@@ -81,4 +95,90 @@ int Solver::getNextType() {
 		return -1;
 	}
 	return idx;
+}
+
+std::shared_ptr<Circle> Solver::getNextCircle(CircleType& t) {
+	std::vector<Circle> possible = std::vector<Circle>();
+	for (auto& circle : circles) {
+		double wd = 2 * sqrt(t.r * circle->r);
+		Circle c{0,0,0};
+		for (auto& conn : circle->conns) {
+			if (conn.type == ConnType::WALL) {
+				if (conn.wall == Wall::LEFT) {
+					c = Circle{t.r, circle->cy - wd, t.r};
+					c.conns.push_back(Connection(circle));
+					c.conns.push_back(Connection(Wall::LEFT));
+					possible.push_back(c);
+					c = Circle{t.r, circle->cy + wd, t.r};
+					c.conns.push_back(Connection(circle));
+					c.conns.push_back(Connection(Wall::LEFT));
+					possible.push_back(c);
+				} else if (conn.wall == Wall::UP) {
+					c = Circle{circle->cx - wd, t.r,t.r};
+					c.conns.push_back(Connection(circle));
+					c.conns.push_back(Connection(Wall::UP));
+					possible.push_back(c);
+					c = Circle{circle->cx + wd, t.r, t.r};
+					c.conns.push_back(Connection(circle));
+					c.conns.push_back(Connection(Wall::UP));
+					possible.push_back(c);
+				} else if (conn.wall == Wall::RIGHT) {
+					c = Circle{w - t.r, circle->cy - wd, t.r};
+					c.conns.push_back(Connection(circle));
+					c.conns.push_back(Connection(Wall::RIGHT));
+					possible.push_back(c);
+					c = Circle{w - t.r, circle->cy + wd, t.r};
+					c.conns.push_back(Connection(circle));
+					c.conns.push_back(Connection(Wall::RIGHT));
+					possible.push_back(c);
+				} else if (conn.wall == Wall::DOWN) {
+					c = Circle{circle->cx - wd, h - t.r, t.r};
+					c.conns.push_back(Connection(circle));
+					c.conns.push_back(Connection(Wall::DOWN));
+					possible.push_back(c);
+					c = Circle{circle->cx + wd, h - t.r, t.r};
+					c.conns.push_back(Connection(circle));
+					c.conns.push_back(Connection(Wall::DOWN));
+					possible.push_back(c);
+				}
+			}
+		}
+	}
+
+	std::cout << "###################################################\n";
+	possible.erase(std::remove_if(possible.begin(), possible.end(), [&](const Circle& c) {
+		if (c.cx < t.r) return true;
+		if (c.cy < t.r) return true;
+		if (c.cx > w - t.r) return true;
+		if (c.cy > h - t.r) return true;
+
+		for (auto& c2 : circles) {
+			if ((c.cx - c2->cx) * (c.cx - c2->cx) + (c.cy - c2->cy) * (c.cy - c2->cy) < (c.r + c2->r) * (c.r + c2->r)) {
+				return true;
+			}
+		}
+		std::cout << c << std::endl;
+		return false;
+	}), possible.end());
+
+
+	std::cout << "--------------------------------------------\n";
+	for (auto& c : possible) {
+		std::cout << c << std::endl;
+	}
+
+	if (possible.empty()) {
+		std::cout << "empty\n";
+		return nullptr;
+	}
+
+	return std::make_shared<Circle>(possible[0]);
+}
+
+bool Solver::checkPos(const Circle& c) {
+	if (c.cx < c.r) return false;
+	if (c.cy < c.r) return false;
+	if (c.cx > w - c.r) return false;
+	if (c.cy > h - c.r) return false;
+	return true;
 }

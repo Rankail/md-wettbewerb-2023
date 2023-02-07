@@ -38,6 +38,38 @@ struct Point {
 	}
 };
 
+enum class ConnType {
+	CIRCLE,
+	WALL
+};
+
+enum class Wall {
+	UP, RIGHT, DOWN, LEFT
+};
+
+struct Circle;
+
+struct Connection {
+	ConnType type;
+	std::shared_ptr<Circle> other;
+	Wall wall = Wall::LEFT;
+
+	Connection(std::shared_ptr<Circle> other)
+		: type(ConnType::CIRCLE), other(other) {}
+
+	Connection(Wall wall)
+		: type(ConnType::WALL), wall(wall) { }
+
+	friend std::ostream& operator<<(std::ostream& os, const Connection& c) {
+		if (c.type == ConnType::CIRCLE) return os << "<Conn " << c.other.get() << ">";
+		os << "<Conn Wall ";
+		if (c.wall == Wall::DOWN) os << "DOWN>";
+		else if(c.wall == Wall::LEFT) os << "LEFT>";
+		else if(c.wall == Wall::RIGHT) os << "RIGHT>";
+		else if(c.wall == Wall::UP) os << "UP>";
+		return os;
+	}
+};
 
 struct Circle {
 	double cx, cy, r;
@@ -49,39 +81,22 @@ struct Circle {
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const std::shared_ptr<Circle>& c) {
-		return os << "<Circle cx=" << c->cx << " cy=" << c->cy << " r=" << c->r << ">";
+		if (c == nullptr) return os << "<Circle nullptr>";
+		return os << *c;
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, const Circle& c) {
+		os << "<Circle cx=" << c.cx << " cy=" << c.cy << " r=" << c.r;
+		for (auto& conn : c.conns) {
+			os << " " << conn;
+		}
+		os << ">";
+		return os;
 	}
 };
 
-
-enum class ConnType {
-	CIRCLE,
-	WALL
-};
-
-enum class Wall {
-	UP, RIGHT, DOWN, LEFT
-};
-
-struct Connection {
-	ConnType type;
-	std::shared_ptr<Circle> other;
-	Wall wall = Wall::LEFT;
-	double angle; //(from c1 to c2) => connection-point = c1+sin/cos(angle) * c1.r
-
-	Connection(std::shared_ptr<Circle> self, std::shared_ptr<Circle> other)
-		: type(ConnType::CIRCLE), other(other) {
-		angle = std::atan2(other->cy - self->cy, other->cx - self->cx);
-	}
-
-	Connection(Wall wall)
-		: type(ConnType::WALL), wall(wall), angle(0) { }
-};
-
-static Circle leftWallDown(std::shared_ptr<Circle> c, double r) {
-	double cx = r;
-	double cy = c->cy + 2. * std::sqrt(c->r * r);
-	return Circle{cx, cy, r};
+static Point leftWallDown(std::shared_ptr<Circle> c, double r) {
+	return Point{r, c->cy + 2. * std::sqrt(c->r * r)};
 }
 
 static Circle leftWallUp(std::shared_ptr<Circle> c, double r) {
