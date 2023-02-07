@@ -78,7 +78,7 @@ int Solver::getNextType() {
 	}
 	if (idx == -1) {
 		printf("Failed to find next type\n");
-		throw new std::exception("Failed to find next type.");
+		throw std::exception("Failed to find next type.");
 	}
 	return idx;
 }
