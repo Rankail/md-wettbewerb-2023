@@ -3,3 +3,5 @@ vs-cpp/.vs
 **.vcxproj*
 vs-cpp/bin
 vs-cpp/bin-int
+vs-cpp/**/SDL2.dll
+!vs-cpp/dependencies/SDL2/lib/SDL2.dll

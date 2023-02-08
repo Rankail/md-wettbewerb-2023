@@ -9,6 +9,8 @@ public:
 	virtual ~Solver();
 
 	bool readInput(const std::string& path);
+	void outputCircles(const std::string& path);
+
 	void run();
 
 
@@ -19,6 +21,7 @@ public:
 	void display() {}
 
 private:
+	std::string name;
 	double w, h;
 	std::vector<CircleType> types;
 

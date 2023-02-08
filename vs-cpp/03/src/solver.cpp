@@ -17,6 +17,10 @@ bool Solver::readInput(const std::string& path) {
 		return false;
 	}
 
+	auto lastSlash = path.find_last_of("/");
+	auto lastDot = path.find_last_of(".");
+	this->name = path.substr(lastSlash, lastDot - lastSlash);
+
 	std::string line;
 	std::getline(file, line);
 	std::getline(file, line);
@@ -45,6 +49,19 @@ bool Solver::readInput(const std::string& path) {
 	return true;
 }
 
+void Solver::outputCircles(const std::string& path) {
+	std::ofstream file;
+	file.open(path);
+	if (!file.is_open()) {
+		printf("Failed to open output-file.\n");
+		return;
+	}
+
+	for (auto& circle : circles) {
+		file << std::setprecision(std::numeric_limits<double>::digits10+2) << circle->cx << " " << circle->cy << " " << circle->r << " " << circle->typeIndex << "\n";
+	}
+}
+
 void Solver::run() {
 	int cur = 0;
 	
@@ -55,23 +72,21 @@ void Solver::run() {
 	CircleType& t = types[nextIdx];
 	std::cout << t << std::endl;
 	circles.push_back(Circle::create(t.r, t.r, t.r));
-	circles[cur]->conns.push_back(Connection(Wall::LEFT));
-	circles[cur]->conns.push_back(Connection(Wall::UP));
+	circles[0]->conns.push_back(Connection(Wall::LEFT));
+	circles[0]->conns.push_back(Connection(Wall::UP));
+	circles[0]->typeIndex = t.index;
 	t.count++;
-	cur++;
 
-	bool fits = true;
-	while (fits) {
-		fits = false;
+	while (true) {
 		int nextIdx = getNextType();
 		t = types[nextIdx];
 
 		std::shared_ptr<Circle> c = getNextCircle(t);
-		if (c != nullptr) fits = true;
+		if (c == nullptr) break;;
+		c->typeIndex = t.index;
 		std::cout << c << circles.size() << std::endl;
 		circles.push_back(c);
 		types[nextIdx].count++;
-		cur++;
 	}
 
 	std::cout << "Result:\n";

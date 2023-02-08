@@ -1,1 +1,2 @@
 vs-cpp/dependencies/* linguist-vendored
+*.h linguist-language=cpp

@@ -8,7 +8,7 @@
 #include <memory>
 #include <iostream>
 #include <cmath>
-#include <stdexcept>
+#include <iomanip>
 
 #define PI 3.1415926535897932384626433832795028841971
 
@@ -29,6 +29,10 @@ struct CircleType {
 	}
 };
 
+struct Input {
+	std::string name;
+	std::vector<CircleType> types;
+};
 
 struct Point {
 	double x, y;
@@ -72,6 +76,7 @@ struct Connection {
 };
 
 struct Circle {
+	int typeIndex;
 	double cx, cy, r;
 	std::vector<Connection> conns;
 	Circle(double cx, double cy, double r) : cx(cx), cy(cy), r(r) {}
