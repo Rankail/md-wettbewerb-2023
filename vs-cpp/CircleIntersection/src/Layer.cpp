@@ -24,11 +24,8 @@ static Point circleCircleIntersection(const Circle& c1, const Circle& c2) {
 	double a = (c1.r * c1.r - c2.r * c2.r + d * d) / (2. * d);
 	double h = std::sqrt(c1.r * c1.r - a * a);
 
-	double x2 = c1.cx + a * dx / d;
-	double y2 = c1.cy + a * dy / d;
-
-	double x3 = c1.cx + (a * dx + h * dy) / d;
-	double y3 = c1.cy + (a * dy + h * dx) / d;
+	double x3 = c1.cx + (a * dx - h * dy) / d;
+	double y3 = c1.cy + (a * dy - h * dx) / d;
 
 	return Point{x3, y3};
 }

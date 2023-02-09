@@ -16,8 +16,8 @@ workspace "md_2023"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
--- include "01"
--- include "02"
+include "01"
+include "02"
 include "03"
--- include "CircleIntersection"
+include "CircleIntersection"
 include "Display"

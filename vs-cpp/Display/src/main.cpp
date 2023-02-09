@@ -112,6 +112,17 @@ int main(int argc, char** argv) {
 		SDL_WaitEvent(&e);
 		if (e.type == SDL_QUIT) quit = true;
 		if (e.type == SDL_KEYDOWN && e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) quit = true;
+		if (e.type == SDL_MOUSEBUTTONDOWN) {
+			int x, y;
+			SDL_GetMouseState(&x, &y);
+			for (auto& c : circles) {
+				double dx = c.cx - x;
+				double dy = c.cy - y;
+				if (dx * dx + dy * dy < c.r * c.r) {
+					printf("%f %f %f %d\n", c.cx, c.cy, c.r, c.type);
+				}
+			}
+		}
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 		SDL_RenderClear(renderer);

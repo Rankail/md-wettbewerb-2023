@@ -19,9 +19,10 @@ struct CircleType {
 	double r;
 	double sizeMultiplier;
 	int count;
+	double weight;
 
 	CircleType(int index, double r)
-		: index(index), r(r), sizeMultiplier(0), count(0) {
+		: index(index), r(r), sizeMultiplier(0.), count(0), weight(0.) {
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const CircleType& ct) {
@@ -56,6 +57,8 @@ struct Circle;
 struct Connection {
 	ConnType type;
 	std::shared_ptr<Circle> other;
+	double maxRadiusLeft = 0;
+	double maxRadiusRight = 0;
 	Wall wall = Wall::LEFT;
 
 	Connection(std::shared_ptr<Circle> other)
@@ -67,10 +70,13 @@ struct Connection {
 	friend std::ostream& operator<<(std::ostream& os, const Connection& c) {
 		if (c.type == ConnType::CIRCLE) return os << "<Conn " << c.other.get() << ">";
 		os << "<Conn Wall ";
-		if (c.wall == Wall::DOWN) os << "DOWN>";
-		else if(c.wall == Wall::LEFT) os << "LEFT>";
-		else if(c.wall == Wall::RIGHT) os << "RIGHT>";
-		else if(c.wall == Wall::UP) os << "UP>";
+		if (c.wall == Wall::DOWN) os << "DOWN";
+		else if(c.wall == Wall::LEFT) os << "LEFT";
+		else if(c.wall == Wall::RIGHT) os << "RIGHT";
+		else if(c.wall == Wall::UP) os << "UP";
+		os << " lr=" << c.maxRadiusLeft;
+		os << " rr=" << c.maxRadiusRight;
+		os << ">";
 		return os;
 	}
 };
@@ -159,9 +165,26 @@ static Point intersectionTwoCircles(double cx1, double cy1, double cr1, double c
 	return Point{x3, y3};
 }
 
+static Point intersectionTwoCircles2(double cx1, double cy1, double cr1, double cx2, double cy2, double cr2) {
+	double dx = cx2 - cx1;
+	double dy = cy2 - cy1;
+	double d = std::sqrt(dx * dx + dy * dy);
+	double a = (cr1 * cr1 - cr2 * cr2 + d * d) / (2. * d);
+	double h = std::sqrt(cr1 * cr1 - a * a);
+
+	double x3 = cx1 + (a * dx - h * dy) / d;
+	double y3 = cy1 + (a * dy - h * dx) / d;
+
+	return Point{x3, y3};
+}
+
 static Circle circleFromTwoCircles(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r) {
 	auto p = intersectionTwoCircles(c1->cx, c1->cy, c1->r + r, c2->cx, c2->cy, c2->r + r);
 	return Circle{p.x, p.y, r};
 }
 
+static Circle circleFromTwoCircles2(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r) {
+	auto p = intersectionTwoCircles2(c1->cx, c1->cy, c1->r + r, c2->cx, c2->cy, c2->r + r);
+	return Circle{p.x, p.y, r};
+}
 #endif
