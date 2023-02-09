@@ -46,9 +46,9 @@ bool Solver::readInput(const std::string& path) {
 	double block = 0;
 	for (CircleType& t : types) {
 		t.sizeMultiplier = t.r / min;
-		block += t.r * t.r * PI;
+		block += t.r * t.r;
 	}
-	numBlocks = block / w * h;
+	numBlocks = block * PI / w * h;
 
 
 	return true;
@@ -75,7 +75,7 @@ void Solver::outputCircles(const std::string& path) {
 */
 void Solver::run() {
 	int cur = 0;
-	
+
 	if (!loaded) return;
 
 	circles = std::vector<std::shared_ptr<Circle>>();
