@@ -4,22 +4,45 @@
 
 Solver::Solver(const std::string& file) {
 	loaded = readInput(file);
+
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		printf("Failed to initialize SDL! Error: %s\n", SDL_GetError());
+		return;
+	}
+
+	window = SDL_CreateWindow("Draw Circles", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, (int)w, (int)h, SDL_WINDOW_SHOWN);
+	if (window == NULL) {
+		printf("Failed to create SDL_Window! Error: %s\n", SDL_GetError());
+		return;
+	}
+
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (renderer == NULL) {
+		printf("Failed to create SDL_Renderer! Error: %s\n", SDL_GetError());
+		return;
+	}
 }
 
 Solver::~Solver() {
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 }
 
 /*
 * Reads input from file and calculates some basic statistics
 */
 bool Solver::readInput(const std::string& path) {
-	std::cout << "Reading inputfile" << std::endl;
 	std::ifstream file;
 	file.open(path);
 	if (!file.is_open()) {
-		std::cout << "Failed to read inputfile!\n" << std::endl;
+		printf("Failed to read file!\n");
 		return false;
 	}
+
+	auto lastSlash = path.find_last_of("/");
+	auto lastDot = path.find_last_of(".");
+	this->name = path.substr(lastSlash, lastDot - lastSlash);
 
 	std::string line;
 	std::getline(file, line);
@@ -27,7 +50,6 @@ bool Solver::readInput(const std::string& path) {
 	size_t space = line.find(' ');
 	w = (double)std::stoi(line.substr(0, space));
 	h = (double)std::stoi(line.substr(space + 1));
-
 
 	int i = 0;
 	while (std::getline(file, line)) {
@@ -48,7 +70,6 @@ bool Solver::readInput(const std::string& path) {
 	}
 	numBlocks = block / w * h;
 
-	std::cout << "Finished reading inputfile" << std::endl;
 
 	return true;
 }
@@ -57,20 +78,16 @@ bool Solver::readInput(const std::string& path) {
 * writes constructed circles to file
 */
 void Solver::outputCircles(const std::string& path) {
-	std::cout << "Finished computing" << std::endl;
 	std::ofstream file;
 	file.open(path);
 	if (!file.is_open()) {
 		printf("Failed to open output-file.\n");
 		return;
 	}
-	std::cout << "Writing to '" << path << "'" << std::endl;
 
 	for (auto& circle : circles) {
 		file << std::setprecision(std::numeric_limits<double>::digits10+2) << circle->cx << " " << circle->cy << " " << circle->r << " " << circle->typeIndex << "\n";
 	}
-	file.close();
-	std::cout << "Finished" << std::endl;
 }
 
 /*
@@ -80,8 +97,6 @@ void Solver::run() {
 	int cur = 0;
 	
 	if (!loaded) return;
-
-	std::cout << "Starting computation" << std::endl;
 
 	connections = std::vector<std::shared_ptr<Connection>>();
 	connections.push_back(Connection::create(Corner::TL));
@@ -124,7 +139,7 @@ void Solver::run() {
 		totalCount += (double)type.count;
 		sumCountSquared += (double)(type.count * type.count);
 	}
-	size *= PI;
+	size *= M_PI;
 	std::cout << "Result:\n";
 	/*for (auto& c : circles) {
 		std::cout << c << std::endl;
@@ -134,6 +149,8 @@ void Solver::run() {
 	std::cout << "size: " << A << std::endl;
 	std::cout << "Divers: " << D << std::endl;
 	std::cout << "B: " << A * D << std::endl;
+
+	render();
 }
 
 /*
@@ -418,4 +435,25 @@ std::shared_ptr<Circle> Solver::circlFromCorner(Corner corner, double r) {
 		c->conns.push_back(Connection::create(c, Wall::DOWN));
 	}
 	return c;
+}
+
+void Solver::render() {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
+	SDL_RenderClear(renderer);
+
+	SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+	for (auto& circle : circles) {
+		drawCircle(renderer, circle);
+	}
+
+	SDL_RenderPresent(renderer);
+
+	bool c = false;
+	while (!c) {
+		SDL_Event e;
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) c = true;
+			if (e.type == SDL_KEYUP && e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) c = true;
+		}
+	}
 }

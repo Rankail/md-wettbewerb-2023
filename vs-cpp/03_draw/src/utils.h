@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include <SDL.h>
 
 #define PI 3.1415926535897932384626433832795028841971
 
@@ -186,6 +187,41 @@ static Point intersectionTwoCircles(double cx1, double cy1, double cr1, double c
 static std::shared_ptr<Circle> circleFromTwoCircles(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r) {
 	auto p = intersectionTwoCircles(c1->cx, c1->cy, c1->r + r, c2->cx, c2->cy, c2->r + r);
 	return Circle::create(p.x, p.y, r);
+}
+
+static void drawCircle(SDL_Renderer* renderer, std::shared_ptr<Circle> c) {
+	int32_t cx = (int32_t)c->cx;
+	int32_t cy = (int32_t)c->cy;
+	const int32_t diameter = (int32_t)(c->r * 2.);
+
+	int32_t x = (int32_t)c->r - 1;
+	int32_t y = 0;
+	int32_t tx = 1;
+	int32_t ty = 1;
+	int32_t error = tx - diameter;
+
+	while (x >= y) {
+		SDL_RenderDrawPoint(renderer, cx + x, cy - y);
+		SDL_RenderDrawPoint(renderer, cx + x, cy + y);
+		SDL_RenderDrawPoint(renderer, cx - x, cy - y);
+		SDL_RenderDrawPoint(renderer, cx - x, cy + y);
+		SDL_RenderDrawPoint(renderer, cx + y, cy - x);
+		SDL_RenderDrawPoint(renderer, cx + y, cy + x);
+		SDL_RenderDrawPoint(renderer, cx - y, cy - x);
+		SDL_RenderDrawPoint(renderer, cx - y, cy + x);
+
+		if (error <= 0) {
+			y++;
+			error += ty;
+			ty += 2;
+		}
+
+		if (error > 0) {
+			x--;
+			tx += 2;
+			error += tx - diameter;
+		}
+	}
 }
 
 #endif

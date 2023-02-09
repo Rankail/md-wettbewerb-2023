@@ -1,11 +1,14 @@
 #include "solver.h"
 
 int main(int argc, char** argv) {
-	Solver s = Solver("../inputs/forest01.txt");
+	if (argc != 3) {
+		printf("Usage: 03.exe [inputfile] [outputfile]");
+		return 1;
+	}
+	Solver s = Solver(std::string(argv[1]));
 
 	s.run();
-	s.outputCircles("../results/forest01.txt");
-	s.display();
+	s.outputCircles(std::string(argv[2]));
 	
 	return 0;
 }

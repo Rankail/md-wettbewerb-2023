@@ -43,6 +43,8 @@ public:
 	std::shared_ptr<Circle> circleFromWall(std::shared_ptr<Connection> conn, bool left, double r);
 	std::shared_ptr<Circle> circlFromCorner(Corner corner, double r);
 
+	void render();
+
 private:
 	std::string name;
 	double w, h;
@@ -54,6 +56,9 @@ private:
 	double numBlocks;
 
 	bool loaded;
+
+	SDL_Window* window;
+	SDL_Renderer* renderer;
 };
 
 #endif

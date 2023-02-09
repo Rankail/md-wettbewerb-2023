@@ -8,8 +8,6 @@ struct Circle {
 	int type;
 };
 
-
-
 static void drawCircle(SDL_Renderer* renderer, Circle& c) {
 	int color = ((c.type >> 16) ^ c.type) * 0x45d9f3b;
 	color = ((color >> 16) ^ color) * 0x45d9f3b;
@@ -54,13 +52,12 @@ static void drawCircle(SDL_Renderer* renderer, Circle& c) {
 }
 
 int main(int argc, char** argv) {
-	/*if (argc != 2) {
-		printf("Usage: display.exe [file]\n");
+	if (argc != 2) {
+		printf("Usage: Display.exe [file]\n");
 		return 1;
-	}*/
+	}
 
-	//std::string path = std::string(argv[1]);
-	std::string path = "../results/forest01.txt";
+	std::string path = std::string(argv[1]);
 	std::ifstream file;
 	file.open(path);
 	if (!file.is_open()) {

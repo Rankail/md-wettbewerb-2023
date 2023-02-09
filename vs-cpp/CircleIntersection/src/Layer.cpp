@@ -24,8 +24,11 @@ static Point circleCircleIntersection(const Circle& c1, const Circle& c2) {
 	double a = (c1.r * c1.r - c2.r * c2.r + d * d) / (2. * d);
 	double h = std::sqrt(c1.r * c1.r - a * a);
 
-	double x3 = c1.cx + (a * dx - h * dy) / d;
-	double y3 = c1.cy + (a * dy - h * dx) / d;
+	double x2 = c1.cx + a * dx / d;
+	double y2 = c1.cy + a * dy / d;
+
+	double x3 = x2 + h * dy / d;
+	double y3 = y2 - h * dx / d;
 
 	return Point{x3, y3};
 }
@@ -74,11 +77,6 @@ static Circle constructSoddyCircle(const Circle& c1, const Circle& c2, const Cir
 Layer::Layer() {
 	circles = std::vector<Circle>();
 
-	circles.push_back(Circle{300., 300., 100.});
-	circles.push_back(Circle{700., 300., 300.});
-	circles.push_back(circleTwo(circles[0], circles[1], 200));
-	circles.push_back(constructSoddyCircle(circles[0], circles[1], circles[2]));
-
 	cooldown = 0.;
 	paused = true;
 }
@@ -95,6 +93,23 @@ void Layer::events(SDL_Event e) {
 }
 
 void Layer::update(float dt) {
+	int x, y;
+	SDL_GetMouseState(&x, &y);
+	double mx = (double)x, my = (double)y;
+
+	circles.clear();
+	double c1x = 500.;
+	double c1y = 500.;
+	double r1 = 100.;
+	double r2 = 50.;
+	circles.push_back(Circle{ c1x, c1y, r1 });
+	double dx = mx - c1x;
+	double dy = my - c1y;
+	double d = std::sqrt(dx * dx + dy * dy);
+
+	circles.push_back(Circle{ c1x + dx / d * (r1+r2), c1y + dy / d * (r1+r2), r2});
+	circles.push_back(circleTwo(circles[0], circles[1], 200));
+	//circles.push_back(constructSoddyCircle(circles[0], circles[1], circles[2]));
 }
 
 void Layer::render() {
@@ -103,6 +118,7 @@ void Layer::render() {
 
 	Renderer::setColor(0, 0xff, 0xff);
 	for (auto& circle : circles) {
+		Renderer::drawCircle(circle.cx, circle.cy, circle.r + 200.);
 		Renderer::drawCircle(circle.cx, circle.cy, circle.r);
 	}
 
