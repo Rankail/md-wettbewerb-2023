@@ -1,12 +1,31 @@
-01: 0.671072
-02: 0.685703
-03: 0.533914
-04: 0.801797 (1000) sonst 0.746212
-05: 0.801797 (1000) sonst 0.746212
-06: 0.803923 (1000) sonst 0.757479
-07: 0.803923 (1000) sonst 0.757479
-08: 0.713750 (1000) sonst 0.453981
-09: 0.557948 (1000)
+01: 0.662700 (583   NBS) better in old version: 0.671072
+02: 0.680152 (10349 NBS) better in old version: 0.685703
+03: 0.705413 (1003  NBS)
+04: 0.855697 (18754 NBS)
+05: 0.855697 (18754 NBS)
+06: 0.842552 (16903 NBS)
+07: 0.842552 (16903 NBS)
+08: 0.908666 (23584 NBS)
+09: 0.914712 (2867  NBS)
 10: -
 
 03.exe forest01.txt ../results/forest01.txt.out
+"C:\Users\Samuel\.jdks\openjdk-18.0.2.1\bin\java.exe" -jar checker.jar inputs/forest01.txt results/forest01.txt.out
+
+bisher:
+Für alle Connections max-Radius berechnen -> passendsten aussuchen
+
+Optimierungsmöglichkeiten:
+
+Connections in links rechts aufteilen -> Connections wo eine Seite 0 ist minimieren -> weniger calcRadius
+
+3 Listen:
+Nicht-berechnet: alle Connectiosn mit unbestimmtem MaxRadius;
+Berechnet: alle Connections mit berechnetem Radius (sortiert?)
+Remove: alle Connections mit beiden Radien 0; Wird nach jedem Durchlauf geleert.
+Liste mit berechneten Radien enthält perfekt passenden?
+Sonst: maxRadius berechnen, bis perfekt passender gefunden; dabei berechnete nicht perfekte in Berechnet-Liste/Remove-Liste
+Kein perfekt passender? => minimaler passender
+Wenn ausgewählt -> Alle die in der Nähe sind aus Liste entfernen
+=> minimale Anzahl an max-Radius-Berechnungen
+ist es möglich das alte Maximum zu behalten um nicht die neue Berechnung abzukürzen?

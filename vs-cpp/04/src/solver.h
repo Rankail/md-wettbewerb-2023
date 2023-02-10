@@ -14,6 +14,8 @@ public:
 	void run();
 
 	void stepWeights();
+
+	std::shared_ptr<PossibleCircle> getCircleFromConnection(std::shared_ptr<Connection> conn, double r);
 	std::shared_ptr<PossibleCircle> getNextCircle(CircleType& t);
 
 	bool checkValid(double cx, double cy, double r);
@@ -37,7 +39,8 @@ private:
 	std::vector<CircleType> types;
 
 	std::vector<std::shared_ptr<Circle>> circles;
-	std::vector<std::shared_ptr<Connection>> connections;
+	std::vector<std::shared_ptr<Connection>> conns_unknown;
+	std::vector<std::shared_ptr<Connection>> conns_calculated;
 
 	int circleCountAtMax = 0;
 

@@ -20,6 +20,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 include "02"
 include "03"]]
 include "03"
+include "04"
 --[[include "03_conn_list_draw"
 include "CircleIntersection"]]
 include "Display"
