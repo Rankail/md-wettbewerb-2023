@@ -33,6 +33,10 @@ project "Display"
         '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}%{prj.name}"'
     }
 
+    debugargs {
+        "../results/forest05.txt"
+    }
+
     filter "configurations:Debug"
         defines { "DEBUG" }
         symbols "On"

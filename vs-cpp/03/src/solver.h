@@ -15,7 +15,7 @@ public:
 
 
 	void stepWeights();
-	std::shared_ptr<Circle> getNextCircle(CircleType& t);
+	std::shared_ptr<PossibleCircle> getNextCircle(CircleType& t);
 
 	void updateConns(std::shared_ptr<Circle> c);
 
@@ -28,20 +28,11 @@ public:
 
 	std::vector<std::pair<double, std::shared_ptr<Circle>>> getAllPossible(double r);
 
-	std::shared_ptr<Circle> getWallUpLeft(std::shared_ptr<Circle> c, double r, double wd);
-	std::shared_ptr<Circle> getWallUpRight(std::shared_ptr<Circle> c, double r, double wd);
-	std::shared_ptr<Circle> getWallLeftUp(std::shared_ptr<Circle> c, double r, double wd);
-	std::shared_ptr<Circle> getWallLeftDown(std::shared_ptr<Circle> c, double r, double wd);
-	std::shared_ptr<Circle> getWallDownLeft(std::shared_ptr<Circle> c, double r, double wd);
-	std::shared_ptr<Circle> getWallDownRight(std::shared_ptr<Circle> c, double r, double wd);
-	std::shared_ptr<Circle> getWallRightUp(std::shared_ptr<Circle> c, double r, double wd);
-	std::shared_ptr<Circle> getWallRightDown(std::shared_ptr<Circle> c, double r, double wd);
+	std::shared_ptr<PossibleCircle> getCircleCircleLeft(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r);
+	std::shared_ptr<PossibleCircle> getCircleCircleRight(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r);
 
-	std::shared_ptr<Circle> getCircleCircleLeft(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r);
-	std::shared_ptr<Circle> getCircleCircleRight(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r);
-
-	std::shared_ptr<Circle> circleFromWall(std::shared_ptr<Connection> conn, bool left, double r);
-	std::shared_ptr<Circle> circlFromCorner(Corner corner, double r);
+	std::shared_ptr<PossibleCircle> circleFromWall(std::shared_ptr<Connection> conn, bool left, double r);
+	std::shared_ptr<PossibleCircle> circlFromCorner(Corner corner, double r);
 
 private:
 	std::string name;

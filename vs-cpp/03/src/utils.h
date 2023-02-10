@@ -170,6 +170,24 @@ struct Circle {
 	}
 };
 
+struct PossibleCircle : std::enable_shared_from_this<PossibleCircle> {
+	std::vector<std::shared_ptr<Connection>> conns;
+	std::shared_ptr<Circle> circle;
+	double maxRadius = 0.;
+
+	PossibleCircle(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns)
+		: conns(conns), circle(circle) { }
+
+	static std::shared_ptr<PossibleCircle> create(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns) {
+		return std::make_shared<PossibleCircle>(circle, conns);
+	}
+
+	std::shared_ptr<PossibleCircle> setMaxRadius(double maxRadius) {
+		this->maxRadius = maxRadius;
+		return shared_from_this();
+	}
+};
+
 static Point intersectionTwoCircles(double cx1, double cy1, double cr1, double cx2, double cy2, double cr2) {
 	double dx = cx2 - cx1;
 	double dy = cy2 - cy1;

@@ -68,22 +68,48 @@ int main(int argc, char** argv) {
 	std::vector<Circle> circles = std::vector<Circle>();
 	double cx, cy, r;
 	int type;
+	int maxType = 0;
 	while (file >> cx) {
 		file >> cy;
 		file >> r;
 		file >> type;
 
+		maxType = std::max(type, maxType);
 		circles.emplace_back(Circle{ cx, cy, r, type });
 	}
 
+	std::vector<int> counts = std::vector<int>();
+	for (int i = 0; i <= maxType; i++) {
+		counts.push_back(0);
+	}
+
+	double size = 0;
 	double maxX = 0., maxY = 0.;
 	for (auto& c : circles) {
 		maxX = std::max(maxX, c.cx + c.r);
 		maxY = std::max(maxY, c.cy + c.r);
+		counts[c.type]++;
+		size += c.r * c.r;
 	}
+	size *= M_PI;
+
+	double totalCountSquared = 0.;
+	double sumCountsSquared = 0.;
+	for (int i = 0; i < counts.size(); i++) {
+		totalCountSquared += counts[i];
+		sumCountsSquared += counts[i] * counts[i];
+	}
+	totalCountSquared *= totalCountSquared;
 
 	double w = std::ceil(maxX / 100) * 100;
 	double h = std::ceil(maxY / 100) * 100;
+
+	double A = size / (w * h);
+	double D = 1. - sumCountsSquared / totalCountSquared;
+
+	printf("A: %f\n", A);
+	printf("D: %f\n", D);
+	printf("B: %f\n", A * D);
 
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
