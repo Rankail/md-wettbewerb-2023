@@ -67,26 +67,26 @@ struct Connection {
 		Wall wall = Wall::LEFT;
 		Corner corner;
 	};
-	double maxRadiusLeft = 0;
-	double maxRadiusRight = 0;
+	double maxRadius = 0;
+	bool left = true;
 
-	Connection(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2)
-		: type(ConnType::CIRCLE), c1(c1), c2(c2) {}
+	Connection(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, bool left)
+		: type(ConnType::CIRCLE), c1(c1), c2(c2), left(left) {}
 
-	Connection(std::shared_ptr<Circle> c1, Wall wall)
-		: type(ConnType::WALL), c1(c1), wall(wall) {}
+	Connection(std::shared_ptr<Circle> c1, Wall wall, bool left)
+		: type(ConnType::WALL), c1(c1), wall(wall), left(left) {}
 
 	Connection(Corner corner)
 		: type(ConnType::CORNER), c1(nullptr), corner(corner) {}
 
 	virtual ~Connection() {}
 
-	static std::shared_ptr<Connection> create(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2) {
-		return std::make_shared<Connection>(c1, c2);
+	static std::shared_ptr<Connection> create(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, bool left) {
+		return std::make_shared<Connection>(c1, c2, left);
 	}
 
-	static std::shared_ptr<Connection> create(std::shared_ptr<Circle> c1, Wall wall) {
-		return std::make_shared<Connection>(c1, wall);
+	static std::shared_ptr<Connection> create(std::shared_ptr<Circle> c1, Wall wall, bool left) {
+		return std::make_shared<Connection>(c1, wall, left);
 	}
 
 	static std::shared_ptr<Connection> create(Corner corner) {
@@ -110,8 +110,8 @@ struct Connection {
 			else if (c.corner == Corner::BL) os << "BL";
 			else if (c.corner == Corner::BR) os << "BR";
 		}
-		os << " lr=" << c.maxRadiusLeft;
-		os << " rr=" << c.maxRadiusRight;
+		os << " mr=" << c.maxRadius;
+		os << " left=" << c.left;
 		os << ">";
 		return os;
 	}
@@ -133,8 +133,8 @@ struct Connection {
 			else if (c->corner == Corner::BL) os << "BL";
 			else if (c->corner == Corner::BR) os << "BR";
 		}
-		os << " lr=" << c->maxRadiusLeft;
-		os << " rr=" << c->maxRadiusRight;
+		os << " mr=" << c->maxRadius;
+		os << " left=" << c->left;
 		os << ">";
 		return os;
 	}

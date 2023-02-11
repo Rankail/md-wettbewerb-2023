@@ -13,6 +13,10 @@ project "03"
         "src/**.txt"
     }
 
+    debugargs {
+        "../inputs/forest01.txt", "../results/forest01.txt.out"
+    }
+
     filter "configurations:Debug"
         defines { "DEBUG" }
         symbols "On"

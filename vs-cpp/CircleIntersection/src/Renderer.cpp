@@ -42,7 +42,8 @@ void Renderer::drawRect(SDL_Rect rect) {
 }
 
 void Renderer::drawRect(int32_t x, int32_t y, int32_t w, int32_t h) {
-	SDL_RenderDrawRect(renderer, new SDL_Rect{x, y, w, h});
+	SDL_Rect r = SDL_Rect{ x, y, w, h };
+	SDL_RenderDrawRect(renderer, &r);
 }
 
 void Renderer::fillRect(SDL_Rect rect) {
@@ -50,7 +51,8 @@ void Renderer::fillRect(SDL_Rect rect) {
 }
 
 void Renderer::fillRect(int32_t x, int32_t y, int32_t w, int32_t h) {
-	SDL_RenderFillRect(renderer, new SDL_Rect{x, y, w, h});
+	SDL_Rect r = SDL_Rect{ x, y, w, h };
+	SDL_RenderFillRect(renderer, &r);
 }
 
 void Renderer::drawLine(int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
@@ -62,6 +64,7 @@ void Renderer::drawPoint(int32_t x, int32_t y) {
 }
 
 void Renderer::drawCircle(int32_t cx, int32_t cy, int32_t r) {
+	if (cx < 0 || cy < 0) return;
 	const int32_t d = 2 * r;
 
 	int32_t x = r - 1;

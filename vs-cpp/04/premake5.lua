@@ -1,7 +1,7 @@
-project "Display"  
+project "04"  
     kind "ConsoleApp" 
     language "C++"
-    cppdialect "C++20"
+    cppdialect "C++17"
     staticruntime "off"
 
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -13,28 +13,8 @@ project "Display"
         "src/**.txt"
     }
 
-    includedirs
-    {
-        "%{IncludeDir.SDL}",
-    }
-
-    libdirs
-    {
-        "%{LibraryDir.SDL}"
-    }
-
-    links
-    {
-        "SDL2", "SDL2main"
-    }
-
-    prebuildcommands
-    {
-        '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}%{prj.name}"'
-    }
-
     debugargs {
-        "../results/forest05.txt"
+        "../inputs/forest01.txt", "../results/forest01.txt.out"
     }
 
     filter "configurations:Debug"

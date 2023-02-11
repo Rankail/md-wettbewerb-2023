@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv) {
 	if (argc != 3) {
-		printf("Usage: 03.exe [inputfile] [outputfile]");
+		printf("Usage: 04.exe [inputfile] [outputfile]");
 		return 1;
 	}
 

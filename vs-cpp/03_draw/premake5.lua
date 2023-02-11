@@ -1,7 +1,7 @@
-project "Display"  
+project "03_draw"  
     kind "ConsoleApp" 
     language "C++"
-    cppdialect "C++20"
+    cppdialect "C++17"
     staticruntime "off"
 
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -31,10 +31,6 @@ project "Display"
     prebuildcommands
     {
         '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}%{prj.name}"'
-    }
-
-    debugargs {
-        "../results/forest05.txt"
     }
 
     filter "configurations:Debug"
