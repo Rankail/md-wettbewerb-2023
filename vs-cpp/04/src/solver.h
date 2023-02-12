@@ -5,7 +5,7 @@
 
 class Solver {
 public:
-	Solver(const std::string& file);
+	Solver(const std::string& file, const char* weightening = "0");
 	virtual ~Solver();
 
 	bool readInput(const std::string& path);
@@ -45,6 +45,7 @@ private:
 	std::vector<double> radii;
 
 	int circleCountAtMax = 0;
+	double weightening;
 
 	double numBlocks;
 

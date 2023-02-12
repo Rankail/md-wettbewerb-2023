@@ -26,12 +26,15 @@ The executables can be found in `bin` and are copied to `inputs`
 
 This generates output from the specified inputfile:
 ```
-04_Release.exe [inputfile] [outputfile]
+04_Release.exe inputfile outputfile [weightening]
 ```
+weightening
+0-1 => constant to linear
+1-2 => linear to quadratic
 \
 Renders an outputfile (only works under Windows for now):
 ```
-Display.exe [file]
+Display.exe file
 ```
 
 ## Optimizations

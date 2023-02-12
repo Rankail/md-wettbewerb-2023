@@ -3,8 +3,14 @@
 #include "utils.h"
 #include <limits>
 
-Solver::Solver(const std::string& file) {
+Solver::Solver(const std::string& file, const char* weightening) {
 	loaded = readInput(file);
+
+	this->weightening = std::atof(weightening);
+	if (this->weightening > 2. || 0 > this->weightening) {
+		printf("Weightening must be between 0 and 2\n");
+		loaded = false;
+	}
 }
 
 Solver::~Solver() {
@@ -226,7 +232,10 @@ void Solver::stepWeights() {
 	std::vector<double> weights = std::vector<double>();
 	for (int i = 0; i < types.size(); i++) {
 		//double weight = types[i].sizeMultiplier * (1. - types[i].count*types[i].sizeMultiplier / numBlocks);
-		double weight = 1.;
+
+		double weight;
+		if (weight <= 1.) weight = (weightening * weightening * types[i].r) + (1. - weightening * weightening);
+		else weight = types[i].r * (std::pow(weightening-1., 5.) * types[i].r + (1. - std::pow(weightening-1., 5.)));
 		weights.push_back(weight);
 		maxWeight = std::max(maxWeight, weight);
 	}
