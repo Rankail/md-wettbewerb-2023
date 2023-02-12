@@ -88,10 +88,6 @@ void Solver::outputCircles(const std::string& path) {
 * constructs circles
 */
 void Solver::run() {
-<<<<<<< HEAD
-	int cur = 0;
-=======
->>>>>>> master
 
 	if (!loaded) return;
 
