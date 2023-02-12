@@ -33,7 +33,7 @@ project "04_draw"
     }
 
     postbuildcommands {
-        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}exe/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"'
+        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}inputs/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"'
     }
 
     filter "system:windows"

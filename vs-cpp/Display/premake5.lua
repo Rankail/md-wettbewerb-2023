@@ -33,8 +33,12 @@ project "Display"
         '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}%{prj.name}"'
     }
 
+    postbuildcommands {
+        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}results/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"'
+    }
+
     debugargs {
-        "../results/forest05.txt"
+        "../results/forest10.txt.out"
     }
 
     filter "configurations:Debug"

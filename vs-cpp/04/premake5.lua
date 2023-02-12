@@ -18,7 +18,7 @@ project "04"
     }
 
     postbuildcommands {
-        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}exe/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"'
+        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}inputs/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"'
     }
 
     filter "configurations:Debug"

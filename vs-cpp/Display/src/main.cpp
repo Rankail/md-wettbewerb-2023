@@ -92,10 +92,6 @@ int main(int argc, char** argv) {
 		size += c.r * c.r * M_PI;
 	}
 
-	for (auto& c : counts) {
-		printf("%d\n", c);
-	}
-
 	double totalCountSquared = 0.;
 	double sumCountsSquared = 0.;
 	for (int i = 0; i < counts.size(); i++) {
@@ -116,7 +112,7 @@ int main(int argc, char** argv) {
 	while (w > 1000. || h > 1000.) {
 		w /= 2.; h /= 2.;
 		for (auto& c : circles) {
-			c.r /= 2.;
+			c.r = std::max(1., c.r/2.);
 			c.cx /= 2.;
 			c.cy /= 2.;
 		}

@@ -42,6 +42,7 @@ private:
 	std::vector<std::shared_ptr<Connection>> conns_calculated;
 
 	std::unordered_map<double, int> radiusMap;
+	std::vector<double> radii;
 
 	int circleCountAtMax = 0;
 
