@@ -22,7 +22,7 @@ make config=release
 
 ## Execute
 
-The executables are in `bin`
+The executables can be found in `bin` and are copied to `inputs`
 
 This generates output from the specified inputfile:
 ```

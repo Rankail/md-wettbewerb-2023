@@ -1,6 +1,7 @@
 #include "solver.h"
 
 #include <chrono>
+#include <string>
 
 int main(int argc, char** argv) {
 	if (argc != 3) {
@@ -11,7 +12,6 @@ int main(int argc, char** argv) {
 	auto startTime = std::chrono::high_resolution_clock::now();
 
 	Solver s = Solver(std::string(argv[1]));
-
 	s.run();
 	s.outputCircles(std::string(argv[2]));
 

@@ -1,6 +1,7 @@
 #include "solver.h"
 
 #include "utils.h"
+#include <limits>
 
 //#define BINARY_SEARCH_RADIUS
 
@@ -46,9 +47,9 @@ bool Solver::readInput(const std::string& path) {
 	double block = 0;
 	for (CircleType& t : types) {
 		t.sizeMultiplier = t.r / max;
-		block += t.r * t.r * PI;
+		block += t.r * t.r;
 	}
-	numBlocks = block / w * h;
+	numBlocks = block * PI / w * h;
 
 	return true;
 }
@@ -77,7 +78,7 @@ void Solver::outputCircles(const std::string& path) {
 */
 void Solver::run() {
 	int cur = 0;
-	
+
 	if (!loaded) return;
 
 	std::cout << "Computing" << std::endl;
@@ -106,7 +107,7 @@ void Solver::run() {
 
 			std::shared_ptr<PossibleCircle> pc = getNextCircle(type);
 			if (pc == nullptr) continue;
-			
+
 			std::shared_ptr<Circle> c = pc->circle;
 			c->typeIndex = type.index;
 			for (auto& conn : pc->conns) {
@@ -124,7 +125,7 @@ void Solver::run() {
 			});
 
 			type.count++;
-			
+
 			size += c->r * c->r * PI;
 			double sumCountSquared = 0.;
 			for (auto& t : types) {

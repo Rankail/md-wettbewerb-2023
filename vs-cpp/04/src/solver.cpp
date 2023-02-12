@@ -1,6 +1,7 @@
 #include "solver.h"
 
 #include "utils.h"
+#include <limits>
 
 Solver::Solver(const std::string& file) {
 	loaded = readInput(file);
@@ -50,9 +51,8 @@ bool Solver::readInput(const std::string& path) {
 		r = t.r;
 		t.sizeMultiplier = t.r / max;
 		block += t.r * t.r * PI;
-		
 	}
-	numBlocks = block / w * h;
+	numBlocks = block * PI / w * h;
 
 	radiusMap = std::unordered_map<double, int>();
 	for (auto i = 0; i < radii.size(); i++) {
@@ -85,7 +85,6 @@ void Solver::outputCircles(const std::string& path) {
 		file << std::setprecision(std::numeric_limits<double>::digits10 + 2) << c->cx << " " << c->cy << " " << c->r << " " << c->typeIndex << "\n";
 	}
 	file.close();
-	std::cout << "Finished" << std::endl;
 }
 
 /*
@@ -286,7 +285,7 @@ std::shared_ptr<PossibleCircle> Solver::getNextCircle(CircleType& t) {
 	conns_unknown.clear();
 
 	// no perfect match => find next best
-	auto& nextBest = std::lower_bound(conns_calculated.begin(), conns_calculated.end(), t.r, [](const std::shared_ptr<Connection>& conn, double r) {
+	auto nextBest = std::lower_bound(conns_calculated.begin(), conns_calculated.end(), t.r, [](const std::shared_ptr<Connection>& conn, double r) {
 		return conn->maxRadius < r;
 	});
 
