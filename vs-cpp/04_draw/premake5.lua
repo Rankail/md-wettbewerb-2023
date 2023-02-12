@@ -1,4 +1,4 @@
-project "04"  
+project "04_draw"  
     kind "ConsoleApp" 
     language "C++"
     cppdialect "C++17"
@@ -13,6 +13,21 @@ project "04"
         "src/**.txt"
     }
 
+    includedirs
+    {
+        "%{IncludeDir.SDL}",
+    }
+
+    libdirs
+    {
+        "%{LibraryDir.SDL}"
+    }
+
+    links
+    {
+        "SDL2", "SDL2main"
+    }
+
     debugargs {
         "../inputs/forest01.txt", "../results/forest01.txt.out"
     }
@@ -20,6 +35,12 @@ project "04"
     postbuildcommands {
         '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}exe/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"'
     }
+
+    filter "system:windows"
+        prebuildcommands
+        {
+            '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}%{prj.name}"'
+        }
 
     filter "configurations:Debug"
         defines { "DEBUG" }

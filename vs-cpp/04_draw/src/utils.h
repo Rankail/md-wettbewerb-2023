@@ -10,6 +10,7 @@
 #include <cmath>
 #include <iomanip>
 #include <unordered_map>
+#include <SDL.h>
 
 #define PI 3.1415926535897932384626433832795028841971
 
@@ -100,12 +101,10 @@ struct Connection {
 	}
 
 	Connection(std::shared_ptr<Circle> c1, Wall wall, bool left)
-		: type(ConnType::WALL), c1(c1), wall(wall), left(left), index(c1->index) {
-	}
+		: type(ConnType::WALL), c1(c1), wall(wall), left(left), index(c1->index) { }
 
 	Connection(Corner corner)
-		: type(ConnType::CORNER), c1(nullptr), corner(corner), index(0) {
-	}
+		: type(ConnType::CORNER), c1(nullptr), corner(corner), index(0) { }
 
 	virtual ~Connection() {}
 
@@ -174,8 +173,7 @@ struct PossibleCircle : std::enable_shared_from_this<PossibleCircle> {
 	double maxRadius = 0.;
 
 	PossibleCircle(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns)
-		: conns(conns), circle(circle) {
-	}
+		: conns(conns), circle(circle) { }
 
 	static std::shared_ptr<PossibleCircle> create(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns) {
 		return std::make_shared<PossibleCircle>(circle, conns);
@@ -203,6 +201,41 @@ static Point intersectionTwoCircles(double cx1, double cy1, double cr1, double c
 static std::shared_ptr<Circle> circleFromTwoCircles(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r) {
 	auto p = intersectionTwoCircles(c1->cx, c1->cy, c1->r + r, c2->cx, c2->cy, c2->r + r);
 	return Circle::create(p.x, p.y, r);
+}
+
+static void drawCircle(SDL_Renderer* renderer, std::shared_ptr<Circle> c) {
+	int32_t cx = (int32_t)c->cx;
+	int32_t cy = (int32_t)c->cy;
+	const int32_t diameter = (int32_t)(c->r * 2.);
+
+	int32_t x = (int32_t)c->r - 1;
+	int32_t y = 0;
+	int32_t tx = 1;
+	int32_t ty = 1;
+	int32_t error = tx - diameter;
+
+	while (x >= y) {
+		SDL_RenderDrawPoint(renderer, cx + x, cy - y);
+		SDL_RenderDrawPoint(renderer, cx + x, cy + y);
+		SDL_RenderDrawPoint(renderer, cx - x, cy - y);
+		SDL_RenderDrawPoint(renderer, cx - x, cy + y);
+		SDL_RenderDrawPoint(renderer, cx + y, cy - x);
+		SDL_RenderDrawPoint(renderer, cx + y, cy + x);
+		SDL_RenderDrawPoint(renderer, cx - y, cy - x);
+		SDL_RenderDrawPoint(renderer, cx - y, cy + x);
+
+		if (error <= 0) {
+			y++;
+			error += ty;
+			ty += 2;
+		}
+
+		if (error > 0) {
+			x--;
+			tx += 2;
+			error += tx - diameter;
+		}
+	}
 }
 
 #endif

@@ -6,9 +6,29 @@
 
 Solver::Solver(const std::string& file) {
 	loaded = readInput(file);
+
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		printf("Failed to initialize SDL! Error: %s\n", SDL_GetError());
+		return;
+	}
+
+	window = SDL_CreateWindow("Draw Circles", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, (int)w, (int)h, SDL_WINDOW_SHOWN);
+	if (window == NULL) {
+		printf("Failed to create SDL_Window! Error: %s\n", SDL_GetError());
+		return;
+	}
+
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (renderer == NULL) {
+		printf("Failed to create SDL_Renderer! Error: %s\n", SDL_GetError());
+		return;
+	}
 }
 
 Solver::~Solver() {
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 }
 
 /*
@@ -77,7 +97,7 @@ void Solver::outputCircles(const std::string& path) {
 
 	for (int i = 0; i < circleCountAtMax; i++) {
 		auto& c = circles[i];
-		file << std::setprecision(std::numeric_limits<double>::digits10 + 2) << c->cx << " " << c->cy << " " << c->r << " " << c->typeIndex << "\n";
+		file << std::setprecision(std::numeric_limits<double>::digits10+2) << c->cx << " " << c->cy << " " << c->r << " " << c->typeIndex << "\n";
 	}
 	file.close();
 	std::cout << "Finished" << std::endl;
@@ -87,7 +107,7 @@ void Solver::outputCircles(const std::string& path) {
 * constructs circles
 */
 void Solver::run() {
-
+	
 	if (!loaded) return;
 
 	std::cout << "Starting computation" << std::endl;
@@ -119,33 +139,33 @@ void Solver::run() {
 			std::shared_ptr<PossibleCircle> pc = getNextCircle(type);
 			if (pc == nullptr) continue;
 			std::shared_ptr<Circle> circle = pc->circle;
-
+			
 			// move conns to unknown if they are near the new circle
 			auto partition = std::stable_partition(conns_calculated.begin(), conns_calculated.end(), [&](const std::shared_ptr<Connection>& conn) {
 				double dx = 0., dy = 0., r = 0.;
 				if (conn->type == ConnType::CORNER) {
-					r = conn->maxRadius * 2 + circle->r;
+					r = conn->maxRadius*2 + circle->r;
 					switch (conn->corner) {
-						case Corner::TL: {
-							dx = std::abs(circle->cx - conn->maxRadius);
-							dy = std::abs(circle->cy - conn->maxRadius);
-							break;
-						}
-						case Corner::TR: {
-							dx = std::abs(circle->cx - (w - conn->maxRadius));
-							dy = std::abs(circle->cy - conn->maxRadius);
-							break;
-						}
-						case Corner::BL: {
-							dx = std::abs(circle->cx - conn->maxRadius);
-							dy = std::abs(circle->cy - (h - conn->maxRadius));
-							break;
-						}
-						case Corner::BR: {
-							dx = std::abs(circle->cx - (w - conn->maxRadius));
-							dy = std::abs(circle->cy - (h - conn->maxRadius));
-							break;
-						}
+					case Corner::TL: {
+						dx = std::abs(circle->cx - conn->maxRadius);
+						dy = std::abs(circle->cy - conn->maxRadius);
+						break;
+					}
+					case Corner::TR: {
+						dx = std::abs(circle->cx - (w - conn->maxRadius));
+						dy = std::abs(circle->cy - conn->maxRadius);
+						break;
+					}
+					case Corner::BL: {
+						dx = std::abs(circle->cx - conn->maxRadius);
+						dy = std::abs(circle->cy - (h - conn->maxRadius));
+						break;
+					}
+					case Corner::BR: {
+						dx = std::abs(circle->cx - (w - conn->maxRadius));
+						dy = std::abs(circle->cy - (h - conn->maxRadius));
+						break;
+					}
 					}
 				} else if (conn->type == ConnType::WALL) {
 					r = circle->r + conn->maxRadius * 2 + conn->c1->r;
@@ -174,14 +194,13 @@ void Solver::run() {
 
 			circles.push_back(circle);
 
-			circle->typeIndex = type.index;
 			type.count++;
-
+			
 			// calculate stats to find maximum
 			size += circle->r * circle->r * PI;
 			double sumCountSquared = 0.;
 			for (auto& t : types) {
-				sumCountSquared += (double)t.count * (double)t.count;
+				sumCountSquared += t.count * t.count;
 			}
 			double A = size / (w * h);
 			double D = 1. - sumCountSquared / (circles.size() * circles.size());
@@ -195,17 +214,21 @@ void Solver::run() {
 			}
 
 			if (circles.size() % 1000 == 0) {
-				std::cout << "Max: " << maxB << " = " << mA << " * " << mD << " at " << circleCountAtMax << " circles; total: " << circles.size() << " circles" << std::endl;
+				std::cout << "Max: " << maxB << " = " << mA << " * " << mD << " (" << circleCountAtMax << " circles)" << std::endl;
 			}
 
+			render();
 			iteration++;
 		}
 	}
-finished:
+	finished:
 
 	std::cout << "Result:\n";
 
 	std::cout << "Max: " << maxB << " = " << mA << " * " << mD << " (" << circleCountAtMax << " circles)" << std::endl;
+
+	//render();
+
 }
 
 /*
@@ -243,8 +266,8 @@ std::shared_ptr<PossibleCircle> Solver::getCircleFromConnection(std::shared_ptr<
 std::shared_ptr<PossibleCircle> Solver::getNextCircle(CircleType& t) {
 	auto calcIt = std::lower_bound(conns_calculated.begin(), conns_calculated.end(), t.r, [](const std::shared_ptr<Connection>& a, double r) {
 		return a->maxRadius < r;
-	});
-// perfect matching Connection was already calculated?
+		});
+	// perfect matching Connection was already calculated?
 	if (calcIt != conns_calculated.end() && (*calcIt)->maxRadius == t.r) {
 		if ((*calcIt)->maxRadius >= t.r) {
 			return getCircleFromConnection(*calcIt, t.r);
@@ -295,7 +318,7 @@ bool Solver::checkValid(double cx, double cy, double r) {
 	if (cy + r > h) return false;
 
 	for (auto& c : circles) {
-		if ((c->cx - cx) * (c->cx - cx) + (c->cy - cy) * (c->cy - cy) < (r + c->r) * (c->r + r) - 0.0000000001) return false;
+		if ((c->cx - cx) * (c->cx - cx) + (c->cy - cy) * (c->cy - cy) < (r + c->r) * (c->r + r)-0.0000000001) return false;
 	}
 	return true;
 }
@@ -514,4 +537,26 @@ std::shared_ptr<PossibleCircle> Solver::circlFromCorner(Corner corner, double r)
 	}
 	c->index = iteration;
 	return PossibleCircle::create(c, conns);
+}
+
+void Solver::render() {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
+	SDL_RenderClear(renderer);
+
+	SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+	for (auto& circle : circles) {
+		drawCircle(renderer, circle);
+	}
+
+	SDL_RenderPresent(renderer);
+
+	/*bool c = false;
+	while (!c) {
+		SDL_Event e;
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) c = true;
+			if (e.type == SDL_KEYUP && e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) c = true;
+		}
+	}*/
+	return;
 }

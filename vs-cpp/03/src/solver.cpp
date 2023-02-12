@@ -15,7 +15,7 @@ Solver::~Solver() {
 * Reads input from file and calculates some basic statistics
 */
 bool Solver::readInput(const std::string& path) {
-	std::cout << "Reading inputfile" << std::endl;
+	std::cout << "Reading from '" << path << "'" << std::endl;
 	std::ifstream file;
 	file.open(path);
 	if (!file.is_open()) {
@@ -50,8 +50,6 @@ bool Solver::readInput(const std::string& path) {
 	}
 	numBlocks = block / w * h;
 
-	std::cout << "Finished reading inputfile" << std::endl;
-
 	return true;
 }
 
@@ -59,7 +57,6 @@ bool Solver::readInput(const std::string& path) {
 * writes constructed circles to file
 */
 void Solver::outputCircles(const std::string& path) {
-	std::cout << "Finished computing" << std::endl;
 	std::ofstream file;
 	file.open(path);
 	if (!file.is_open()) {
@@ -73,7 +70,6 @@ void Solver::outputCircles(const std::string& path) {
 		file << std::setprecision(std::numeric_limits<double>::digits10+2) << c->cx << " " << c->cy << " " << c->r << " " << c->typeIndex << "\n";
 	}
 	file.close();
-	std::cout << "Finished" << std::endl;
 }
 
 /*
@@ -84,7 +80,7 @@ void Solver::run() {
 	
 	if (!loaded) return;
 
-	std::cout << "Starting computation" << std::endl;
+	std::cout << "Computing" << std::endl;
 
 	connections = std::vector<std::shared_ptr<Connection>>();
 	connections.push_back(Connection::create(Corner::TL));
@@ -131,13 +127,12 @@ void Solver::run() {
 			
 			size += c->r * c->r * PI;
 			double sumCountSquared = 0.;
-			double totalCount = 0.;
 			for (auto& t : types) {
-				sumCountSquared += type.count * type.count;
-				totalCount += type.count;
+				sumCountSquared += t.count * t.count;
 			}
+			double totalCountSquared = circles.size() * circles.size();
 			double A = size / (w * h);
-			double D = 1. - sumCountSquared / (totalCount * totalCount);
+			double D = 1. - sumCountSquared / totalCountSquared;
 			double B = A * D;
 
 			if (B > maxB) {
@@ -154,23 +149,8 @@ void Solver::run() {
 	}
 	finished:
 
-	double totalCount = 0.;
-	double sumCountSquared = 0.;
-	for (auto& type : types) {
-		totalCount += (double)type.count;
-		sumCountSquared += (double)(type.count * type.count);
-	}
-	std::cout << "Result:\n";
-	/*for (auto& c : circles) {
-		std::cout << c << std::endl;
-	}*/
-	double A = size / (w * h);
-	double D = 1. - sumCountSquared / totalCount / totalCount;
-	std::cout << "A: " << A << std::endl;
-	std::cout << "D: " << D << std::endl;
-	std::cout << "B: " << A * D << std::endl;
-
-	std::cout << "Max: " << maxB << " = " << mA << " * " << mD << " (" << circleCountAtMax << " circles)" << std::endl;
+	std::cout << "\nResult:\n";
+	std::cout << "Max: " << maxB << " = " << mA << " * " << mD << " (" << circleCountAtMax << " circles)\n\n";
 }
 
 /*

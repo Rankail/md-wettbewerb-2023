@@ -16,11 +16,13 @@ workspace "md_2023"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
---[[include "01"
-include "02"
-include "03"]]
-include "03"
+--include "01"
+--include "02"
+--include "03"]]
+--include "03"
+--include "03_draw"
 include "04"
---[[include "03_conn_list_draw"
-include "CircleIntersection"]]
-include "Display"
+--include "04_draw"
+--include "03_conn_list_draw"
+--include "CircleIntersection"
+--include "Display"
