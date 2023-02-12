@@ -81,7 +81,6 @@ void Solver::outputCircles(const std::string& path) {
 		file << std::setprecision(std::numeric_limits<double>::digits10 + 2) << c->cx << " " << c->cy << " " << c->r << " " << c->typeIndex << "\n";
 	}
 	file.close();
-	std::cout << "Finished" << std::endl;
 }
 
 /*
