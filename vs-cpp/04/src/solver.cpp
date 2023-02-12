@@ -46,9 +46,9 @@ bool Solver::readInput(const std::string& path) {
 	double block = 0;
 	for (CircleType& t : types) {
 		t.sizeMultiplier = t.r / max;
-		block += t.r * t.r * PI;
+		block += t.r * t.r;
 	}
-	numBlocks = block / w * h;
+	numBlocks = block * PI / w * h;
 
 	radiusMap = std::unordered_map<double, int>();
 	for (auto i = 0; i < types.size(); i++) {
