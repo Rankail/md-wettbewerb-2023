@@ -1,6 +1,7 @@
 #include "solver.h"
 
 #include "utils.h"
+#include <limits>
 
 //#define BINARY_SEARCH_RADIUS
 
@@ -81,7 +82,7 @@ void Solver::outputCircles(const std::string& path) {
 */
 void Solver::run() {
 	int cur = 0;
-	
+
 	if (!loaded) return;
 
 	std::cout << "Starting computation" << std::endl;
@@ -113,7 +114,7 @@ void Solver::run() {
 			std::shared_ptr<PossibleCircle> pc = getNextCircle(type);
 			if (pc == nullptr) continue;
 			std::shared_ptr<Circle> circle = pc->circle;
-			
+
 			// move conns to unknown if they are near the new circle
 			auto partition = std::stable_partition(conns_calculated.begin(), conns_calculated.end(), [&](const std::shared_ptr<Connection>& conn) {
 				double dx, dy, r;
@@ -171,7 +172,7 @@ void Solver::run() {
 			});*/
 
 			type.count++;
-			
+
 			// calculate stats to find maximum
 			size += circle->r * circle->r * PI;
 			double sumCountSquared = 0.;
@@ -285,7 +286,7 @@ std::shared_ptr<PossibleCircle> Solver::getNextCircle(CircleType& t) {
 	conns_unknown.clear();
 
 	// no perfect match => find next best
-	auto& nextBest = std::lower_bound(conns_calculated.begin(), conns_calculated.end(), t.r, [](const std::shared_ptr<Connection>& conn, double r) {
+	auto nextBest = std::lower_bound(conns_calculated.begin(), conns_calculated.end(), t.r, [](const std::shared_ptr<Connection>& conn, double r) {
 		return conn->maxRadius < r;
 	});
 

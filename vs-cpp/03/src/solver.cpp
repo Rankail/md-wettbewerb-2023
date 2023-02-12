@@ -1,6 +1,7 @@
 #include "solver.h"
 
 #include "utils.h"
+#include <limits>
 
 //#define BINARY_SEARCH_RADIUS
 
