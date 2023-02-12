@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv) {
 	if (argc != 3) {
-		printf("Usage: 04.exe inputfile outputfile");
+		printf("Usage: 04.exe [inputfile] [outputfile]");
 		return 1;
 	}
 
@@ -28,5 +28,8 @@ int main(int argc, char** argv) {
 	if (minutes.count() > 0 || seconds.count() > 0) std::cout << seconds.count() << "s ";
 	std::cout << ms.count() << "ms" << std::endl;
 
+	s.render();
+	
+	
 	return 0;
 }

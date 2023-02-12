@@ -17,6 +17,10 @@ project "03"
         "../inputs/forest01.txt", "../results/forest01.txt.out"
     }
 
+    postbuildcommands {
+        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}exe/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"'
+    }
+
     filter "configurations:Debug"
         defines { "DEBUG" }
         symbols "On"

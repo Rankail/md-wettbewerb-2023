@@ -26,7 +26,7 @@ The executables are in `bin`
 
 This generates output from the specified inputfile:
 ```
-03.exe [inputfile] [outputfile]
+04_Release.exe [inputfile] [outputfile]
 ```
 \
 Renders an outputfile (only works under Windows for now):
@@ -34,4 +34,9 @@ Renders an outputfile (only works under Windows for now):
 Display.exe [file]
 ```
 
-
+## Optimizations
+Possible Positions of circles are saved as 'Connections'.\
+Those 'Connections' are: Corners, the right and left side of a Wall-Circle- and Circle-Circle-Connection
+Each connection is first saved in a list of unknown Connections
+While searching for a fitting position for the next Circle the max-Radius for each Connection is calculated by trying each Radius from smallest to largest. If the Max-Radius is the radius of the Circle that needs to be placed it's a perfect fit and that Connection is used. If there is not a perfect fit the next-best position is used.\
+All other Connections which maxRadius has been calculated are moved to a list of calculated Connections. Then all Connections that could potentially collide with the newly placed circle are removed from the calculated list. Connections with a maxRadius of 0 are deleted. Connections that are being recalculated don't need to check all radii.

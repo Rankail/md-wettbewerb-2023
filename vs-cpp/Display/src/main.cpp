@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 		circles.emplace_back(Circle{ cx, cy, r, type });
 	}
 
-	std::vector<int> counts = std::vector<int>();
+	std::vector<long> counts = std::vector<long>();
 	for (int i = 0; i <= maxType; i++) {
 		counts.push_back(0);
 	}
@@ -89,28 +89,38 @@ int main(int argc, char** argv) {
 		maxX = std::max(maxX, c.cx + c.r);
 		maxY = std::max(maxY, c.cy + c.r);
 		counts[c.type]++;
-		size += c.r * c.r;
+		size += c.r * c.r * M_PI;
 	}
-	size *= M_PI;
+
+	for (auto& c : counts) {
+		printf("%d\n", c);
+	}
 
 	double totalCountSquared = 0.;
 	double sumCountsSquared = 0.;
 	for (int i = 0; i < counts.size(); i++) {
 		totalCountSquared += counts[i];
-		sumCountsSquared += counts[i] * counts[i];
+		sumCountsSquared += (double)counts[i] * (double)counts[i];
 	}
-	totalCountSquared *= totalCountSquared;
 
 	double w = std::ceil(maxX / 100) * 100;
 	double h = std::ceil(maxY / 100) * 100;
 
 	double A = size / (w * h);
-	double D = 1. - sumCountsSquared / totalCountSquared;
+	double D = 1. - (double)sumCountsSquared / totalCountSquared / totalCountSquared;
 
 	printf("A: %f\n", A);
 	printf("D: %f\n", D);
 	printf("B: %f\n", A * D);
 
+	while (w > 1000. || h > 1000.) {
+		w /= 2.; h /= 2.;
+		for (auto& c : circles) {
+			c.r /= 2.;
+			c.cx /= 2.;
+			c.cy /= 2.;
+		}
+	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Failed to initialize SDL! Error: %s\n", SDL_GetError());
