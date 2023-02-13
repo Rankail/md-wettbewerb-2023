@@ -26,16 +26,17 @@ The executables can be found in `bin` and are copied to `inputs`
 
 This generates output from the specified inputfile:
 ```
-04_Release.exe inputfile outputfile [weightening]
+04_Release.exe inputfile outputfile [weighting]
 ```
-weightening
+weighting
 0-1 => constant to linear
 1-2 => linear to quadratic
 \
-Renders an outputfile (only works under Windows for now):
+Renders an outputfile:
 ```
 Display.exe file
 ```
+If you are using Linux you need to install `libsdl2-dev`.
 
 ## Optimizations
 Possible Positions of circles are saved as 'Connections'.\

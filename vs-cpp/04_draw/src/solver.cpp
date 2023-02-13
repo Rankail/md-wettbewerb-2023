@@ -4,8 +4,14 @@
 
 //#define BINARY_SEARCH_RADIUS
 
-Solver::Solver(const std::string& file) {
+Solver::Solver(const std::string& file, const char* weighting) {
 	loaded = readInput(file);
+
+	this->weighting = std::atof(weighting);
+	if (this->weighting > 2. || 0 > this->weighting) {
+		printf("Weightening must be between 0 and 2\n");
+		loaded = false;
+	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("Failed to initialize SDL! Error: %s\n", SDL_GetError());
@@ -30,6 +36,10 @@ Solver::~Solver() {
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
+
+/*
+* Reads input from file and calculates some basic statistics
+*/
 
 /*
 * Reads input from file and calculates some basic statistics
@@ -63,16 +73,22 @@ bool Solver::readInput(const std::string& path) {
 
 	double max = types[0].r;
 	double block = 0;
+	double r = 0;
+	radii = std::vector<double>();
 	for (CircleType& t : types) {
+		if (r != t.r) {
+			radii.push_back(t.r);
+		}
+		r = t.r;
 		t.sizeMultiplier = t.r / max;
 		block += t.r * t.r * PI;
 	}
-	numBlocks = block / w * h;
+	numBlocks = block * PI / w * h;
 
 	radiusMap = std::unordered_map<double, int>();
-	for (auto i = 0; i < types.size(); i++) {
-		if (radiusMap.find(types[i].r) == radiusMap.end()) {
-			radiusMap[types[i].r] = i;
+	for (auto i = 0; i < radii.size(); i++) {
+		if (radiusMap.find(radii[i]) == radiusMap.end()) {
+			radiusMap[radii[i]] = i;
 		}
 	}
 	radiusMap[0.] = 0;
@@ -97,17 +113,16 @@ void Solver::outputCircles(const std::string& path) {
 
 	for (int i = 0; i < circleCountAtMax; i++) {
 		auto& c = circles[i];
-		file << std::setprecision(std::numeric_limits<double>::digits10+2) << c->cx << " " << c->cy << " " << c->r << " " << c->typeIndex << "\n";
+		file << std::setprecision(std::numeric_limits<double>::digits10 + 2) << c->cx << " " << c->cy << " " << c->r << " " << c->typeIndex << "\n";
 	}
 	file.close();
-	std::cout << "Finished" << std::endl;
 }
 
 /*
 * constructs circles
 */
 void Solver::run() {
-	
+
 	if (!loaded) return;
 
 	std::cout << "Starting computation" << std::endl;
@@ -128,6 +143,8 @@ void Solver::run() {
 	circleCountAtMax = 0;
 
 	int iteration = 0;
+	double lastMax = 0.;
+	int sameFor = 0;
 	while (true) {
 
 		stepWeights();
@@ -139,33 +156,33 @@ void Solver::run() {
 			std::shared_ptr<PossibleCircle> pc = getNextCircle(type);
 			if (pc == nullptr) continue;
 			std::shared_ptr<Circle> circle = pc->circle;
-			
+
 			// move conns to unknown if they are near the new circle
 			auto partition = std::stable_partition(conns_calculated.begin(), conns_calculated.end(), [&](const std::shared_ptr<Connection>& conn) {
 				double dx = 0., dy = 0., r = 0.;
 				if (conn->type == ConnType::CORNER) {
-					r = conn->maxRadius*2 + circle->r;
+					r = conn->maxRadius * 2 + circle->r;
 					switch (conn->corner) {
-					case Corner::TL: {
-						dx = std::abs(circle->cx - conn->maxRadius);
-						dy = std::abs(circle->cy - conn->maxRadius);
-						break;
-					}
-					case Corner::TR: {
-						dx = std::abs(circle->cx - (w - conn->maxRadius));
-						dy = std::abs(circle->cy - conn->maxRadius);
-						break;
-					}
-					case Corner::BL: {
-						dx = std::abs(circle->cx - conn->maxRadius);
-						dy = std::abs(circle->cy - (h - conn->maxRadius));
-						break;
-					}
-					case Corner::BR: {
-						dx = std::abs(circle->cx - (w - conn->maxRadius));
-						dy = std::abs(circle->cy - (h - conn->maxRadius));
-						break;
-					}
+						case Corner::TL: {
+							dx = std::abs(circle->cx - conn->maxRadius);
+							dy = std::abs(circle->cy - conn->maxRadius);
+							break;
+						}
+						case Corner::TR: {
+							dx = std::abs(circle->cx - (w - conn->maxRadius));
+							dy = std::abs(circle->cy - conn->maxRadius);
+							break;
+						}
+						case Corner::BL: {
+							dx = std::abs(circle->cx - conn->maxRadius);
+							dy = std::abs(circle->cy - (h - conn->maxRadius));
+							break;
+						}
+						case Corner::BR: {
+							dx = std::abs(circle->cx - (w - conn->maxRadius));
+							dy = std::abs(circle->cy - (h - conn->maxRadius));
+							break;
+						}
 					}
 				} else if (conn->type == ConnType::WALL) {
 					r = circle->r + conn->maxRadius * 2 + conn->c1->r;
@@ -194,13 +211,14 @@ void Solver::run() {
 
 			circles.push_back(circle);
 
+			circle->typeIndex = type.index;
 			type.count++;
-			
+
 			// calculate stats to find maximum
 			size += circle->r * circle->r * PI;
 			double sumCountSquared = 0.;
 			for (auto& t : types) {
-				sumCountSquared += t.count * t.count;
+				sumCountSquared += (double)t.count * (double)t.count;
 			}
 			double A = size / (w * h);
 			double D = 1. - sumCountSquared / (circles.size() * circles.size());
@@ -214,21 +232,32 @@ void Solver::run() {
 			}
 
 			if (circles.size() % 1000 == 0) {
-				std::cout << "Max: " << maxB << " = " << mA << " * " << mD << " (" << circleCountAtMax << " circles)" << std::endl;
+				if (lastMax == maxB) sameFor++;
+				else sameFor = 0;
+				lastMax = maxB;
+				std::cout << "Max: " << maxB << " = " << mA << " * " << mD << " at " << circleCountAtMax << " circles; Current: " << circles.size() << " circles B=" << B << std::endl;
+				if (sameFor > 1) goto finished;
 			}
 
 			render();
 			iteration++;
 		}
 	}
-	finished:
+finished:
 
 	std::cout << "Result:\n";
 
 	std::cout << "Max: " << maxB << " = " << mA << " * " << mD << " (" << circleCountAtMax << " circles)" << std::endl;
 
-	//render();
-
+	bool c = false;
+	while (!c) {
+		SDL_Event e;
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) c = true;
+			if (e.type == SDL_KEYUP && e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) c = true;
+		}
+		render();
+	}
 }
 
 /*
@@ -239,7 +268,10 @@ void Solver::stepWeights() {
 	std::vector<double> weights = std::vector<double>();
 	for (int i = 0; i < types.size(); i++) {
 		//double weight = types[i].sizeMultiplier * (1. - types[i].count*types[i].sizeMultiplier / numBlocks);
-		double weight = 1.;
+
+		double weight;
+		if (weight <= 1.) weight = (weighting * weighting * types[i].r) + (1. - weighting * weighting);
+		else weight = types[i].r * (std::pow(weighting-1., 5.) * types[i].r + (1. - std::pow(weighting-1., 5.)));
 		weights.push_back(weight);
 		maxWeight = std::max(maxWeight, weight);
 	}
@@ -266,8 +298,8 @@ std::shared_ptr<PossibleCircle> Solver::getCircleFromConnection(std::shared_ptr<
 std::shared_ptr<PossibleCircle> Solver::getNextCircle(CircleType& t) {
 	auto calcIt = std::lower_bound(conns_calculated.begin(), conns_calculated.end(), t.r, [](const std::shared_ptr<Connection>& a, double r) {
 		return a->maxRadius < r;
-		});
-	// perfect matching Connection was already calculated?
+	});
+// perfect matching Connection was already calculated?
 	if (calcIt != conns_calculated.end() && (*calcIt)->maxRadius == t.r) {
 		if ((*calcIt)->maxRadius >= t.r) {
 			return getCircleFromConnection(*calcIt, t.r);
@@ -276,7 +308,7 @@ std::shared_ptr<PossibleCircle> Solver::getNextCircle(CircleType& t) {
 
 	// calculate until perfect match found
 	for (auto it = conns_unknown.rbegin(); it != conns_unknown.rend(); ++it) {
-		auto conn = *it;
+		auto& conn = *it;
 		if (conn->type == ConnType::CIRCLE) {
 			calcMaxRadiusConnectionCircle(conn);
 		} else if (conn->type == ConnType::WALL) {
@@ -298,7 +330,7 @@ std::shared_ptr<PossibleCircle> Solver::getNextCircle(CircleType& t) {
 	conns_unknown.clear();
 
 	// no perfect match => find next best
-	auto& nextBest = std::lower_bound(conns_calculated.begin(), conns_calculated.end(), t.r, [](const std::shared_ptr<Connection>& conn, double r) {
+	auto nextBest = std::lower_bound(conns_calculated.begin(), conns_calculated.end(), t.r, [](const std::shared_ptr<Connection>& conn, double r) {
 		return conn->maxRadius < r;
 	});
 
@@ -318,37 +350,16 @@ bool Solver::checkValid(double cx, double cy, double r) {
 	if (cy + r > h) return false;
 
 	for (auto& c : circles) {
-		if ((c->cx - cx) * (c->cx - cx) + (c->cy - cy) * (c->cy - cy) < (r + c->r) * (c->r + r)-0.0000000001) return false;
+		if ((c->cx - cx) * (c->cx - cx) + (c->cy - cy) * (c->cy - cy) < (r + c->r) * (c->r + r) - 0.0000000001) return false;
 	}
 	return true;
 }
 
 void Solver::calcMaxRadiusConnectionCorner(std::shared_ptr<Connection> conn) {
-#ifdef BINARY_SEARCH_RADIUS
-	auto it = std::lower_bound(types.begin(), types.end(), conn, [&](const CircleType& t, const std::shared_ptr<Connection>& conn) {
-		double r = t.r;
-		double cx, cy;
-		if (conn->corner == Corner::TL) {
-			cx = r; cy = r;
-		} else if (conn->corner == Corner::TR) {
-			cx = w - r; cy = r;
-		} else if (conn->corner == Corner::BL) {
-			cx = r; cy = h - r;
-		} else if (conn->corner == Corner::BR) {
-			cx = w - r; cy = h - r;
-		}
-
-		return !checkValid(cx, cy, r);
-	});
-
-	if (it == types.end()) conn->maxRadiusLeft = 0.;
-	else conn->maxRadiusLeft = it->r;
-
-#else
-	int i = (int)types.size() - 1;
+	int i = (int)radii.size() - 1;
 
 	while (i >= radiusMap[conn->maxRadius]) {
-		double r = types[i].r;
+		double r = radii[i];
 		double cx, cy;
 		if (conn->corner == Corner::TL) {
 			cx = r; cy = r;
@@ -365,43 +376,16 @@ void Solver::calcMaxRadiusConnectionCorner(std::shared_ptr<Connection> conn) {
 		}
 		i--;
 	}
-	if (i == types.size() - 1) conn->maxRadius = 0.;
-	else conn->maxRadius = types[i + 1].r;
-
-#endif
+	if (i == radii.size() - 1) conn->maxRadius = 0.;
+	else conn->maxRadius = radii[i + 1];
 }
 
 void Solver::calcMaxRadiusConnectionWall(std::shared_ptr<Connection> conn) {
-#ifdef BINARY_SEARCH_RADIUS
-	auto it = std::lower_bound(types.begin(), types.end(), conn, [&](const CircleType& t, const std::shared_ptr<Connection>& conn) {
-		auto& c = conn->c1;
-		double r = t.r;
-		double cx, cy;
-		double wd = 2 * std::sqrt(c->r * r) * (conn->left ? 1 : -1);
-		if (conn->wall == Wall::UP) {
-			cx = c->cx - wd;
-			cy = r;
-		} else if (conn->wall == Wall::LEFT) {
-			cx = r;
-			cy = c->cy + wd;
-		} else if (conn->wall == Wall::DOWN) {
-			cx = c->cx + wd;
-			cy = h - r;
-		} else if (conn->wall == Wall::RIGHT) {
-			cx = w - r;
-			cy = c->cy - wd;
-		}
-		return !checkValid(cx, cy, r);
-	});
-	if (it == types.end()) conn->maxRadius = 0.;
-	else conn->maxRadius = it->r;
-
-#else
 	auto& c = conn->c1;
-	int i = (int)types.size() - 1;
+	int i = (int)radii.size() - 1;
 
 	while (i >= radiusMap[conn->maxRadius]) {
-		double r = types[i].r;
+		double r = radii[i];
 		double cx, cy;
 		double wd = 2 * std::sqrt(c->r * r) * (conn->left ? 1 : -1);
 		if (conn->wall == Wall::UP) {
@@ -422,35 +406,11 @@ void Solver::calcMaxRadiusConnectionWall(std::shared_ptr<Connection> conn) {
 		}
 		i--;
 	}
-	if (i == types.size() - 1) {
-		conn->maxRadius = 0;
-	} else {
-		conn->maxRadius = types[i + 1].r;
-	}
-#endif
+	if (i == radii.size() - 1) conn->maxRadius = 0;
+	else conn->maxRadius = radii[i + 1];
 }
 
 void Solver::calcMaxRadiusConnectionCircle(std::shared_ptr<Connection> conn) {
-#ifdef BINARY_SEARCH_RADIUS
-	auto it = std::lower_bound(types.begin(), types.end(), conn, [&](const CircleType& t, const std::shared_ptr<Connection>& conn) {
-		auto& c = conn->c1;
-		double r = t.r;
-		Point n = intersectionTwoCircles(c->cx, c->cy, c->r + r, conn->c2->cx, conn->c2->cy, conn->c2->r + r);
-		return !checkValid(n.x, n.y, r);
-	});
-	if (it == types.end()) conn->maxRadiusLeft = 0.;
-	else conn->maxRadiusLeft = it->r;
-
-	it = std::lower_bound(types.begin(), types.end(), conn, [&](const CircleType& t, const std::shared_ptr<Connection>& conn) {
-		auto& c = conn->c1;
-		double r = t.r;
-		Point n = intersectionTwoCircles(conn->c2->cx, conn->c2->cy, conn->c2->r + r, c->cx, c->cy, c->r + r);
-		return !checkValid(n.x, n.y, r);
-	});
-	if (it == types.end()) conn->maxRadiusRight = 0.;
-	else conn->maxRadiusRight = it->r;
-
-#else
 	std::shared_ptr<Circle> c1 = conn->c1;
 	std::shared_ptr<Circle> c2 = conn->c2;
 	if (!conn->left) {
@@ -458,18 +418,17 @@ void Solver::calcMaxRadiusConnectionCircle(std::shared_ptr<Connection> conn) {
 		c2 = conn->c1;
 	}
 
-	int i = (int)types.size() - 1;
+	int i = (int)radii.size() - 1;
 	while (i >= radiusMap[conn->maxRadius]) {
-		double r = types[i].r;
+		double r = radii[i];
 		Point n = intersectionTwoCircles(c1->cx, c1->cy, c1->r + r, c2->cx, c2->cy, c2->r + r);
 		if (!checkValid(n.x, n.y, r)) {
 			break;
 		}
 		i--;
 	}
-	if (i == types.size() - 1) conn->maxRadius = 0;
-	else conn->maxRadius = types[i + 1].r;
-#endif
+	if (i == radii.size() - 1) conn->maxRadius = 0;
+	else conn->maxRadius = radii[i + 1];
 }
 
 std::shared_ptr<PossibleCircle> Solver::circleFromWall(std::shared_ptr<Connection> conn, double r) {
@@ -550,7 +509,7 @@ void Solver::render() {
 
 	SDL_RenderPresent(renderer);
 
-	/*bool c = false;
+	/*bool c = false; //Uncomment if you wnat to pause after every render
 	while (!c) {
 		SDL_Event e;
 		while (SDL_PollEvent(&e)) {

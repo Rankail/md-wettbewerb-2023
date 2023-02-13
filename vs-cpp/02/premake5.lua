@@ -13,25 +13,32 @@ project "02"
         "src/**.txt"
     }
 
-    includedirs
-    {
-        "%{IncludeDir.SDL}",
-    }
-
-    libdirs
-    {
-        "%{LibraryDir.SDL}"
-    }
-
-    links
-    {
-        "SDL2", "SDL2main"
-    }
-
-    prebuildcommands
-    {
+    prebuildcommands {
         '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}%{prj.name}"'
     }
+
+    filter "system:windows"
+
+        includedirs {
+            "%{IncludeDir.SDL}",
+        }
+
+        libdirs{
+            "%{LibraryDir.SDL}"
+        }
+
+        links {
+            "SDL2", "SDL2main"
+        }
+
+        prebuildcommands {
+            '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}/%{prj.name}"'
+        }
+
+    filter "system:linux"
+        links {
+            "SDL2"
+        }
 
     filter "configurations:Debug"
         defines { "DEBUG" }

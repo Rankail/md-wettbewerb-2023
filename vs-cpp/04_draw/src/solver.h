@@ -5,7 +5,7 @@
 
 class Solver {
 public:
-	Solver(const std::string& file);
+	Solver(const std::string& file, const char* weighting = "0");
 	virtual ~Solver();
 
 	bool readInput(const std::string& path);
@@ -44,8 +44,10 @@ private:
 	std::vector<std::shared_ptr<Connection>> conns_calculated;
 
 	std::unordered_map<double, int> radiusMap;
+	std::vector<double> radii;
 
 	int circleCountAtMax = 0;
+	double weighting;
 
 	double numBlocks;
 

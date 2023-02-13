@@ -6,3 +6,4 @@ vs-cpp/bin-int
 vs-cpp/**/SDL2.dll
 !vs-cpp/dependencies/SDL2/lib/SDL2.dll
 vs-cpp/**/*.exe
+vs-cpp/**/Makefile

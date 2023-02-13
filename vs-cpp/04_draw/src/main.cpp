@@ -3,17 +3,19 @@
 #include <chrono>
 
 int main(int argc, char** argv) {
-	if (argc != 3) {
-		printf("Usage: 04.exe [inputfile] [outputfile]");
+	if (argc < 3 || argc > 4) {
+		printf("Usage: ./04_draw.exe inputfile outputfile [weightening]");
 		return 1;
 	}
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 
-	Solver s = Solver(std::string(argv[1]));
-
-	s.run();
-	s.outputCircles(std::string(argv[2]));
+	Solver* s;
+	if (argc == 4) s = new Solver(std::string(argv[1]), argv[3]);
+	else s = new Solver(std::string(argv[1]));
+	s->run();
+	s->outputCircles(std::string(argv[2]));
+	delete s;
 
 	auto endTime = std::chrono::high_resolution_clock::now();
 
@@ -27,9 +29,6 @@ int main(int argc, char** argv) {
 	if (minutes.count() > 0) std::cout << minutes.count() << "min ";
 	if (minutes.count() > 0 || seconds.count() > 0) std::cout << seconds.count() << "s ";
 	std::cout << ms.count() << "ms" << std::endl;
-
-	s.render();
-	
 	
 	return 0;
 }

@@ -5,7 +5,7 @@
 
 int main(int argc, char** argv) {
 	if (argc < 3 || argc > 4) {
-		printf("Usage: 04.exe inputfile outputfile [weightening]");
+		printf("Usage: ./04.exe inputfile outputfile [weightening]");
 		return 1;
 	}
 
@@ -16,9 +16,9 @@ int main(int argc, char** argv) {
 	else s = new Solver(std::string(argv[1]));
 	s->run();
 	s->outputCircles(std::string(argv[2]));
+	delete s;
 
 	auto endTime = std::chrono::high_resolution_clock::now();
-	delete s;
 
 	auto diff = endTime - startTime;
 

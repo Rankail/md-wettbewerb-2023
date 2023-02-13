@@ -9,7 +9,7 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #define PI 3.1415926535897932384626433832795028841971
 

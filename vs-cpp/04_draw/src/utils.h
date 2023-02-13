@@ -10,7 +10,7 @@
 #include <cmath>
 #include <iomanip>
 #include <unordered_map>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #define PI 3.1415926535897932384626433832795028841971
 
