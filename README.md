@@ -10,31 +10,35 @@ You need [premake](https://premake.github.io/)
 cd vs-cpp
 premake5 vs2022
 ```
-If you don't have Visual Studio 2022 you can also use `vs2019`, `vs2917` and so on.\
+If you don't have Visual Studio 2022 you can also use `vs2019`, `vs2017` and so on.\
 For Cygwin and MinGW use `gmake2`.
 
 ### Linux
 ```
 cd vs-cpp
 premake5 gmake2
-make config=release
+make 04 config=release
 ```
 
 ## Execute
 
-The executables can be found in `bin` and are copied to `inputs`
+The executables can be found in `bin` and are copied to `inputs` or `results`
 
-This generates output from the specified inputfile:
 ```
-04_Release.exe inputfile outputfile [weighting]
+./04_Release.exe inputfile outputfile [weighting]
 ```
-weighting
-0-1 => constant to linear
-1-2 => linear to quadratic
+Weighting:\
+0-1 => constant to linear\
+1-2 => linear to quadratic\
 \
-Renders an outputfile:
+Render and compute:
 ```
-Display.exe file
+./04_draw_Release.exe inputfile outputfile [weighting]
+```
+\
+Render outputfile:
+```
+./Display_Release.exe outputfile
 ```
 If you are using Linux you need to install `libsdl2-dev`.
 
