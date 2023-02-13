@@ -239,9 +239,9 @@ void Solver::run() {
 				if (sameFor > 1) goto finished;
 			}
 
-			render();
 			iteration++;
 		}
+		render();
 	}
 finished:
 
