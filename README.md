@@ -17,26 +17,21 @@ For Cygwin and MinGW use `gmake2`.
 If you are using Ubuntu or Debian install `libsdl2-dev`\
 For other linux-distributions you can look [here](https://lazyfoo.net/tutorials/SDL/01_hello_SDL/linux/index.php)
 ```
-cd vs-cpp
-premake5 gmake2
-make 04 config=release
+$ cd vs-cpp
+$ premake5 gmake2
+$ make 04 config=release
 ```
 
 ## Execute
 
-The executables can be found in `bin` and are copied to `inputs` or `results`
+The executables can be found in `bin` and are copied to `inputs` or `results` on build
 
 ```
-./04_Release.exe inputfile outputfile [weighting]
+./Solver.exe [INPUTFILE OUTPUTFILE WEIGHTING]
 ```
 Weighting:\
 0-1 => constant to linear\
 1-2 => linear to quadratic\
-\
-Render and compute:
-```
-./Solver_Release.exe {--manual | INPUTFILE OUTPUTFILE [WEIGHTING]}
-```
 \
 Render outputfile:
 ```

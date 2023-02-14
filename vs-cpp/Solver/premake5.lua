@@ -13,10 +13,6 @@ project "Solver"
         "src/**.txt"
     }
 
-    debugargs {
-        "--manual"
-    }
-
     postbuildcommands {
         '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/inputs/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"',
     }

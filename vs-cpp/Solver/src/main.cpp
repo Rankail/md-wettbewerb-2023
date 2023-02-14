@@ -8,12 +8,11 @@ int main(int argc, char** argv) {
 	double weighting;
 	
 	// Process Command line arguments
-	std::string arg1(argv[1]);
-	if ((arg1 == "--manual" && argc != 2) || (arg1 != "--manual" && (argc < 3  || argc > 4))) {
-		std::cout << "Usage: ./04_draw.exe {--manual | INPUTFILE OUTPUTFILE [WEIGHTING]}" << std::endl;
+	if (argc != 1 && argc != 4) {
+		std::cout << "Usage: ./Solver.exe [INPUTFILE OUTPUTFILE WEIGHTING]" << std::endl;
 		return 1;
 	}
-	if (arg1 == "--manual") {
+	if (argc == 1) {
 		std::cout << "Inputfile:  ";
 		std::getline(std::cin, input);
 		std::cout << "Outputfile: ";
@@ -21,11 +20,11 @@ int main(int argc, char** argv) {
 		std::cout << "Weighting:  ";
 		std::string weighting_str;
 		std::getline(std::cin, weighting_str);
-		weighting = weighting_str.empty() ? weighting = 0. : std::stof(weighting_str);
+		weighting = weighting_str.empty() ? weighting = 0. : std::stod(weighting_str);
 	} else {
 		input = std::string(argv[1]);
 		output = std::string(argv[2]);
-		weighting = (argc == 4) ? std::atof(argv[3]) : 0.;
+		weighting = std::atof(argv[3]);
 	}
 
 	auto startTime = std::chrono::high_resolution_clock::now();

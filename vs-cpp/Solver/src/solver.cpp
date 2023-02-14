@@ -12,13 +12,13 @@ Solver::Solver() {
 		return;
 	}
 
-	SDL_Window* window = SDL_CreateWindow("Circles", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 600, 600, NULL);
+	window = SDL_CreateWindow("Circles", 0, 30, 600, 600, NULL);
 	if (window == NULL) {
 		std::cout << "Failed to create SDL_Window! Error: " << SDL_GetError() << std::endl;
 		return;
 	}
 
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if (renderer == NULL) {
 		std::cout << "Failed to create SDL_Renderer! Error: " << SDL_GetError() << std::endl;
 		return;
@@ -108,7 +108,7 @@ bool Solver::readInput(const std::string& path) {
 	int i = 0;
 	while (std::getline(file, line)) {
 		space = line.find(' ');
-		types.emplace_back(i, (double)std::stoi(line.substr(0, space)));
+		types.emplace_back(i, std::stod(line.substr(0, space)));
 		i++;
 	}
 
