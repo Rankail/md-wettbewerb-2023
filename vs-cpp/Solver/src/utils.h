@@ -10,6 +10,9 @@
 #include <cmath>
 #include <iomanip>
 #include <unordered_map>
+#ifdef DRAW_SDL
+#include <SDL2/SDL.h>
+#endif
 
 #define PI 3.1415926535897932384626433832795028841971
 
@@ -100,12 +103,10 @@ struct Connection {
 	}
 
 	Connection(std::shared_ptr<Circle> c1, Wall wall, bool left)
-		: type(ConnType::WALL), c1(c1), wall(wall), left(left), index(c1->index) {
-	}
+		: type(ConnType::WALL), c1(c1), wall(wall), left(left), index(c1->index) { }
 
 	Connection(Corner corner)
-		: type(ConnType::CORNER), c1(nullptr), corner(corner), index(0) {
-	}
+		: type(ConnType::CORNER), c1(nullptr), corner(corner), index(0) { }
 
 	virtual ~Connection() {}
 
@@ -173,11 +174,8 @@ struct PossibleCircle : std::enable_shared_from_this<PossibleCircle> {
 	std::shared_ptr<Circle> circle;
 	double maxRadius = 0.;
 
-	PossibleCircle() : circle(nullptr) {}
-
 	PossibleCircle(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns)
-		: conns(conns), circle(circle) {
-	}
+		: conns(conns), circle(circle) { }
 
 	static std::shared_ptr<PossibleCircle> create(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns) {
 		return std::make_shared<PossibleCircle>(circle, conns);
@@ -187,6 +185,17 @@ struct PossibleCircle : std::enable_shared_from_this<PossibleCircle> {
 		this->maxRadius = maxRadius;
 		return shared_from_this();
 	}
+};
+
+struct Result {
+	std::vector<std::shared_ptr<Circle>> circles;
+	double A, D, B;
+	int circleCountAtMax;
+
+	Result(std::vector<std::shared_ptr<Circle>> circles, double A, double D, double B, int circleCountAtMax)
+		: circles(circles), A(A), D(D), B(B), circleCountAtMax(circleCountAtMax) {}
+
+	Result() : A(-1.), D(-1.), B(-1.), circleCountAtMax(-1) {}
 };
 
 static Point intersectionTwoCircles(double cx1, double cy1, double cr1, double cx2, double cy2, double cr2) {
@@ -206,5 +215,43 @@ static std::shared_ptr<Circle> circleFromTwoCircles(std::shared_ptr<Circle> c1, 
 	auto p = intersectionTwoCircles(c1->cx, c1->cy, c1->r + r, c2->cx, c2->cy, c2->r + r);
 	return Circle::create(p.x, p.y, r);
 }
+
+#ifdef DRAW_SDL
+static void drawCircle(SDL_Renderer* renderer, std::shared_ptr<Circle> c, double scale) {
+	int32_t cx = (int32_t)c->cx;
+	int32_t cy = (int32_t)c->cy;
+	const int32_t diameter = std::max(1, (int32_t)(c->r * 2. * scale));
+
+	int32_t x = (int32_t)c->r - 1;
+	int32_t y = 0;
+	int32_t tx = 1;
+	int32_t ty = 1;
+	int32_t error = tx - diameter;
+
+	while (x >= y) {
+		SDL_RenderDrawPoint(renderer, cx + x, cy - y);
+		SDL_RenderDrawPoint(renderer, cx + x, cy + y);
+		SDL_RenderDrawPoint(renderer, cx - x, cy - y);
+		SDL_RenderDrawPoint(renderer, cx - x, cy + y);
+		SDL_RenderDrawPoint(renderer, cx + y, cy - x);
+		SDL_RenderDrawPoint(renderer, cx + y, cy + x);
+		SDL_RenderDrawPoint(renderer, cx - y, cy - x);
+		SDL_RenderDrawPoint(renderer, cx - y, cy + x);
+
+		if (error <= 0) {
+			y++;
+			error += ty;
+			ty += 2;
+		}
+
+		if (error > 0) {
+			x--;
+			tx += 2;
+			error += tx - diameter;
+		}
+	}
+}
+
+#endif
 
 #endif

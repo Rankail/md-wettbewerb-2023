@@ -14,11 +14,8 @@ project "Display"
     }
 
     postbuildcommands {
-        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/results/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"'
-    }
-
-    debugargs {
-        "../results/forest10.txt.out"
+        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/results/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"',
+        '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}/results/"'
     }
 
     filter "system:windows"
@@ -44,10 +41,10 @@ project "Display"
             "SDL2"
         }
 
-    filter "configurations:Debug"
+    filter "configurations:*Debug"
         defines { "DEBUG" }
         symbols "On"
 
-    filter "configurations:Release"
+    filter "configurations:*Release"
         defines { "NDEBUG" }
         optimize "Speed"

@@ -5,17 +5,22 @@
 
 class Solver {
 public:
-	Solver(const std::string& file, const char* weighting = "0");
+	Solver();
 	virtual ~Solver();
 
-	bool readInput(const std::string& path);
-	void outputCircles(const std::string& path);
+	bool init(const std::string& inputfile, double weighting);
 
-	void run();
+	void reset();
+
+	bool readInput(const std::string& path);
+	bool writeOutput(Result& result, const std::string& outputfile);
+
+	Result run();
 
 	void stepWeights();
 
-	std::shared_ptr<PossibleCircle> getCircleFromConnection(std::shared_ptr<Connection> conn, double r);
+	void updateConnections(const std::shared_ptr<Circle>& circle);
+	
 	std::shared_ptr<PossibleCircle> getNextCircle(CircleType& t);
 
 	bool checkValid(double cx, double cy, double r);
@@ -27,10 +32,10 @@ public:
 
 	std::vector<std::pair<double, std::shared_ptr<Circle>>> getAllPossible(double r);
 
+	std::shared_ptr<PossibleCircle> getCircleFromConnection(std::shared_ptr<Connection> conn, double r);
+	std::shared_ptr<PossibleCircle> getCirclFromCorner(Corner corner, double r);
+	std::shared_ptr<PossibleCircle> getCircleFromWall(std::shared_ptr<Connection> conn, double r);
 	std::shared_ptr<PossibleCircle> getCircleFromCircle(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r, bool left);
-
-	std::shared_ptr<PossibleCircle> circleFromWall(std::shared_ptr<Connection> conn, double r);
-	std::shared_ptr<PossibleCircle> circlFromCorner(Corner corner, double r);
 
 	void render();
 
@@ -55,9 +60,12 @@ private:
 
 	bool loaded;
 
+#ifdef DRAW_SDL
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 
+	double scale;
+#endif
 };
 
 #endif

@@ -5,24 +5,15 @@ LibraryDir = {}
 LibraryDir.SDL = "%{wks.location}/dependencies/SDL2/lib"
 
 workspace "md_2023"
-    startproject "02"
+    startproject "Solver"
     architecture "x86_64"
-    configurations { "Debug", "Release" }
+    configurations { "Debug", "Release", "SDL_Debug", "SDL_Release" }
 
-    flags
-	{
+    flags {
 		"MultiProcessorCompile"
 	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
---include "01"
---include "02"
---include "03"]]
---include "03"
---include "03_draw"
-include "04"
-include "04_draw"
---include "03_conn_list_draw"
---include "CircleIntersection"
+include "Solver"
 include "Display"

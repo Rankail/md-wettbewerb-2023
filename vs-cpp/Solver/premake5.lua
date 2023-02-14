@@ -1,4 +1,4 @@
-project "04_draw"  
+project "Solver"  
     kind "ConsoleApp" 
     language "C++"
     cppdialect "C++17"
@@ -14,14 +14,14 @@ project "04_draw"
     }
 
     debugargs {
-        "../inputs/forest01.txt", "../results/forest01.txt.out"
+        "--manual"
     }
 
     postbuildcommands {
-        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/inputs/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"'
+        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/inputs/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"',
     }
 
-    filter "system:windows"
+    filter {"configurations:SDL_*", "system:windows"}
 
         includedirs {
             "%{IncludeDir.SDL}",
@@ -39,15 +39,19 @@ project "04_draw"
             '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}/%{prj.name}"'
         }
 
-    filter "system:linux"
+    filter  {"configurations:SDL_*", "system:linux"}
         links {
             "SDL2"
         }
 
-    filter "configurations:Debug"
+    filter "configurations:*Debug"
         defines { "DEBUG" }
         symbols "On"
 
-    filter "configurations:Release"
+    filter "configurations:*Release"
         defines { "NDEBUG" }
         optimize "Speed"
+
+    filter "configurations:SDL_*"
+        defines { "DRAW_SDL" }
+        postbuildcommands { '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}/inputs/"' }

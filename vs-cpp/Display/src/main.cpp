@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <iostream>
 
 struct Circle {
 	double cx, cy, r;
@@ -52,16 +53,22 @@ static void drawCircle(SDL_Renderer* renderer, Circle& c) {
 }
 
 int main(int argc, char** argv) {
-	if (argc != 2) {
-		printf("Usage: Display.exe [file]\n");
+	if (argc > 2) {
+		std::cout << "Usage: ./Display.exe [FILE]" << std::endl;
 		return 1;
 	}
+	std::string path;
+	if (argc == 2) {
+		path = std::string(argv[1]);
+	} else {
+		std::cout << "File: ";
+		std::getline(std::cin, path);
+	}
 
-	std::string path = std::string(argv[1]);
 	std::ifstream file;
-	file.open(path);
+	file.open(path, std::ios::in);
 	if (!file.is_open()) {
-		printf("Failed to open file!\n");
+		std::cout << "Failed to open file!" << std::endl;
 		return 2;
 	}
 
@@ -105,9 +112,9 @@ int main(int argc, char** argv) {
 	double A = size / (w * h);
 	double D = 1. - (double)sumCountsSquared / totalCountSquared / totalCountSquared;
 
-	printf("A: %f\n", A);
-	printf("D: %f\n", D);
-	printf("B: %f\n", A * D);
+	std::cout << "A: " << A << std::endl;
+	std::cout << "D: " << D << std::endl;
+	std::cout << "B: " << A * D << std::endl;
 
 	while (w > 1000. || h > 1000.) {
 		w /= 2.; h /= 2.;
@@ -119,19 +126,19 @@ int main(int argc, char** argv) {
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		printf("Failed to initialize SDL! Error: %s\n", SDL_GetError());
+		std::cout << "Failed to initialize SDL! Error: " << SDL_GetError() << std::endl;
 		return 3;
 	}
 
 	SDL_Window* window = SDL_CreateWindow("Circles", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, (int)w, (int)h, SDL_WINDOW_SHOWN);
 	if (window == NULL) {
-		printf("Failed to create SDL_Window! Error: %s\n", SDL_GetError());
+		std::cout << "Failed to create SDL_Window! Error: " << SDL_GetError() << std::endl;
 		return 4;
 	}
 
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if (renderer == NULL) {
-		printf("Failed to create SDL_Renderer! Error: %s\n", SDL_GetError());
+		std::cout << "Failed to create SDL_Renderer! Error: " << SDL_GetError() << std::endl;
 		return 5;
 	}
 
@@ -148,7 +155,7 @@ int main(int argc, char** argv) {
 				double dx = c.cx - x;
 				double dy = c.cy - y;
 				if (dx * dx + dy * dy < c.r * c.r) {
-					printf("%f %f %f %d\n", c.cx, c.cy, c.r, c.type);
+					std::cout << c.cx << c.cy << c.r << c.type << std::endl;
 				}
 			}
 		}
