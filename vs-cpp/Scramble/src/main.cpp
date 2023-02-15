@@ -91,6 +91,7 @@ int main(int argc, char** argv) {
 			std::cout << "Please enter a valid option (1,2)" << std::endl;
 			std::getline(std::cin, s);
 		}
+		option = s;
 	}
 
 	if (option == "1") {

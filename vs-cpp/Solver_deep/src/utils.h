@@ -95,20 +95,22 @@ struct Connection {
 		Corner corner;
 	};
 	double maxRadius = 0;
+
+	std::vector<std::shared_ptr<Connection>> nextConns;
 	double maxRadiusScore;
 	
 	bool left = true;
 
 	Connection(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, bool left)
-		: type(ConnType::CIRCLE), c1(c1), c2(c2), left(left) {
+		: type(ConnType::CIRCLE), c1(c1), c2(c2), left(left), maxRadiusScore(0.) {
 		index = std::min(c1->index, c2->index);
 	}
 
 	Connection(std::shared_ptr<Circle> c1, Wall wall, bool left)
-		: type(ConnType::WALL), c1(c1), wall(wall), left(left), index(c1->index) { }
+		: type(ConnType::WALL), c1(c1), wall(wall), left(left), index(c1->index), maxRadiusScore(0.) { }
 
 	Connection(Corner corner)
-		: type(ConnType::CORNER), c1(nullptr), corner(corner), index(0) { }
+		: type(ConnType::CORNER), c1(nullptr), corner(corner), index(0), maxRadiusScore(0.) { }
 
 	virtual ~Connection() {}
 

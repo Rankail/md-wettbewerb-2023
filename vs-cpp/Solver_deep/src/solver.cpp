@@ -3,6 +3,21 @@
 #include "utils.h"
 
 /*
+* Plan:
+* - testing for fit -> only test actual radius we are trying to fit in
+*	- cache that in map<radius, PossibleCircle> of circle
+* - also mark if doesnt fit for that radius (flag/nullptr?)
+* => need to search all of them again or end if circle with at least to nextconns with biggest radius or similiar is found?
+* 
+* !cant tell if another circle fits just because a smaller or larger one doesn't
+* 
+* - use nextconns directly if a placement is chosen
+* 
+* linked-List (list) instead of vector? fast moving/removing but slower sort
+* 
+*/
+
+/*
 * Creates Solver Object and initializes SDL
 */
 Solver::Solver() {
@@ -76,8 +91,8 @@ void Solver::reset() {
 		type.count = 0;
 	}
 
-	conns_unknown = std::vector<std::shared_ptr<Connection>>();
-	conns_calculated = std::vector<std::shared_ptr<Connection>>();
+	conns_unknown = std::list<std::shared_ptr<Connection>>();
+	conns_calculated = std::list<std::shared_ptr<Connection>>();
 
 	conns_unknown.push_back(Connection::create(Corner::TL));
 	conns_unknown.push_back(Connection::create(Corner::TR));

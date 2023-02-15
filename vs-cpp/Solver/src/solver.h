@@ -25,12 +25,9 @@ public:
 
 	bool checkValid(double cx, double cy, double r);
 
-	void calcMaxRadius(const std::shared_ptr<Circle>& circle);
 	void calcMaxRadiusConnectionCorner(std::shared_ptr<Connection> conn);
 	void calcMaxRadiusConnectionWall(std::shared_ptr<Connection> conn);
 	void calcMaxRadiusConnectionCircle(std::shared_ptr<Connection> conn);
-
-	std::vector<std::pair<double, std::shared_ptr<Circle>>> getAllPossible(double r);
 
 	std::shared_ptr<PossibleCircle> getCircleFromConnection(std::shared_ptr<Connection> conn, double r);
 	std::shared_ptr<PossibleCircle> getCirclFromCorner(Corner corner, double r);
@@ -45,8 +42,8 @@ private:
 	std::vector<CircleType> types;
 
 	std::vector<std::shared_ptr<Circle>> circles;
-	std::vector<std::shared_ptr<Connection>> conns_unknown;
 	std::vector<std::shared_ptr<Connection>> conns_calculated;
+	std::vector<std::shared_ptr<Connection>> conns_unknown;
 
 	std::unordered_map<double, int> radiusMap;
 	std::vector<double> radii;
