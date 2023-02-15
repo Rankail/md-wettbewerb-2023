@@ -142,30 +142,41 @@ int main(int argc, char** argv) {
 		return 5;
 	}
 
+	bool slowly = false;
+
 	bool quit = false;
 	while (!quit) {
 		SDL_Event e;
-		SDL_WaitEvent(&e);
-		if (e.type == SDL_QUIT) quit = true;
-		if (e.type == SDL_KEYDOWN && e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) quit = true;
-		if (e.type == SDL_MOUSEBUTTONDOWN) {
-			int x, y;
-			SDL_GetMouseState(&x, &y);
-			for (auto& c : circles) {
-				double dx = c.cx - x;
-				double dy = c.cy - y;
-				if (dx * dx + dy * dy < c.r * c.r) {
-					std::cout << c.cx << c.cy << c.r << c.type << std::endl;
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) quit = true;
+			else if (e.type == SDL_KEYDOWN) {
+				if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) quit = true;
+				if (e.key.keysym.scancode == SDL_SCANCODE_SPACE) slowly = true;
+			} else if (e.type == SDL_MOUSEBUTTONDOWN) {
+				int x, y;
+				SDL_GetMouseState(&x, &y);
+				for (auto& c : circles) {
+					double dx = c.cx - x;
+					double dy = c.cy - y;
+					if (dx * dx + dy * dy < c.r * c.r) {
+						std::cout << c.cx << c.cy << c.r << c.type << std::endl;
+					}
 				}
 			}
 		}
 
+
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 		SDL_RenderClear(renderer);
 
-		for (auto& c : circles) {
-			drawCircle(renderer, c);
+		for (unsigned int i = 0; i < circles.size(); i++) {
+			drawCircle(renderer, circles[i]);
+			if (slowly) {
+				SDL_RenderPresent(renderer);
+				SDL_Delay(1);
+			}
 		}
+		slowly = false;
 
 		SDL_RenderPresent(renderer);
 	}
