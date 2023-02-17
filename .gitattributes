@@ -1,4 +1,4 @@
-vs-cpp/dependencies/* linguist-vendored
-vs-cpp/inputs/* linguist-vendored
-vs-cpp/results/* linguist vendored
+dependencies/* linguist-vendored
+inputs/* linguist-vendored
+results/* linguist vendored
 *.h linguist-language=cpp
