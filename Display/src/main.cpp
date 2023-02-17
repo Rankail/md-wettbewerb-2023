@@ -13,7 +13,10 @@ static void drawCircle(SDL_Renderer* renderer, Circle& c) {
 	int color = ((c.type >> 16) ^ c.type) * 0x45d9f3b;
 	color = ((color >> 16) ^ color) * 0x45d9f3b;
 	color = (color >> 16) ^ color;
-	SDL_SetRenderDrawColor(renderer, (color >> 16) ^ 0xff, (color >> 8) ^ 0xff, color ^ 0xff, 0xff);
+	uint8_t r = 0x80 + ((color >> 16) ^ 0xff) / 2;
+	uint8_t g = 0x80 + ((color >> 8) ^ 0xff) / 2;
+	uint8_t b = 0x80 + (color ^ 0xff) / 2;
+	SDL_SetRenderDrawColor(renderer, r, g, b, 0xff);
 
 	int32_t cx = (int32_t)c.cx;
 	int32_t cy = (int32_t)c.cy;
@@ -144,6 +147,8 @@ int main(int argc, char** argv) {
 
 	bool slowly = false;
 
+	int delay = (circles.size() < 4000) ? 1 : 0;
+
 	bool quit = false;
 	while (!quit) {
 		SDL_Event e;
@@ -173,10 +178,13 @@ int main(int argc, char** argv) {
 			drawCircle(renderer, circles[i]);
 			if (slowly) {
 				SDL_RenderPresent(renderer);
-				SDL_Delay(1);
+				SDL_Delay(delay);
 			}
 		}
-		slowly = false;
+		if (slowly) {
+			slowly = false;
+			std::cout << "finished re-rendering" << std::endl;
+		}
 
 		SDL_RenderPresent(renderer);
 	}
