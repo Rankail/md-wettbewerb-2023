@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-PROCESS_COUNT = 8
+PROCESS_COUNT = 6
 
 def computePoints(id: int, file: str, start: float, end: float, count: int):
     results = []
@@ -29,7 +29,7 @@ def computePoints(id: int, file: str, start: float, end: float, count: int):
 
         with cnt.get_lock():
             cnt.value += 1
-            print(cnt.value)
+            print(cnt.value, weight, m.group(1))
 
         weight += step
 

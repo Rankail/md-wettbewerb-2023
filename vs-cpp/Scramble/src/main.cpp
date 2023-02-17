@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 
 	std::string option;
 	if (argc == 3) {
-		std::string option = argv[2];
+		option = argv[2];
 		if (option != "1" && option != "2") {
 			std::cout << "Please enter a valid option (1,2)" << std::endl;
 			argc = 2;
@@ -95,8 +95,10 @@ int main(int argc, char** argv) {
 	}
 
 	if (option == "1") {
+		std::cout << "Random" << std::endl;
 		scrambleRandom(lines);
 	} else if (option == "2") {
+		std::cout << "Distance from Center" << std::endl;
 		sortCenterDistance(lines);
 	}
 
