@@ -85,6 +85,14 @@ struct Circle {
 	}
 };
 
+struct ConnectionFuture {
+	std::vector<std::shared_ptr<Connection>> conns;
+	std::shared_ptr<Circle> circle;
+	double score;
+
+	ConnectionFuture() : score(-1.), circle(nullptr) {}
+};
+
 struct Connection {
 	int index;
 	ConnType type;
@@ -96,21 +104,20 @@ struct Connection {
 	};
 	double maxRadius = 0;
 
-	std::vector<std::shared_ptr<Connection>> nextConns;
-	double maxRadiusScore;
+	std::unordered_map<double, std::shared_ptr<ConnectionFuture>> cache;
 	
 	bool left = true;
 
 	Connection(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, bool left)
-		: type(ConnType::CIRCLE), c1(c1), c2(c2), left(left), maxRadiusScore(0.) {
+		: type(ConnType::CIRCLE), c1(c1), c2(c2), left(left) {
 		index = std::min(c1->index, c2->index);
 	}
 
 	Connection(std::shared_ptr<Circle> c1, Wall wall, bool left)
-		: type(ConnType::WALL), c1(c1), wall(wall), left(left), index(c1->index), maxRadiusScore(0.) { }
+		: type(ConnType::WALL), c1(c1), wall(wall), left(left), index(c1->index) { }
 
 	Connection(Corner corner)
-		: type(ConnType::CORNER), c1(nullptr), corner(corner), index(0), maxRadiusScore(0.) { }
+		: type(ConnType::CORNER), c1(nullptr), corner(corner), index(0) { }
 
 	virtual ~Connection() {}
 
