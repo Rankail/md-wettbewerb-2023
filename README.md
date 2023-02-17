@@ -17,23 +17,31 @@ For Cygwin and MinGW use `gmake2`.
 If you are using Ubuntu or Debian install `libsdl2-dev`\
 For other linux-distributions you can look [here](https://lazyfoo.net/tutorials/SDL/01_hello_SDL/linux/index.php)
 ```
-$ cd vs-cpp
 $ premake5 gmake2
 $ make 04 config=release
 ```
 
 ## Execute
 
-The executables can be found in `bin` and are copied to `inputs` or `results` on build
+The executables can be found in `bin` and are copied to `inputs` or `results` after building
 
 ```
 ./Solver.exe [INPUTFILE OUTPUTFILE WEIGHTING]
 ```
 Weighting:\
 0-1 => constant to linear\
-1-2 => linear to quadratic\
-\
-Render outputfile:
+1-2 => linear to quadratic
+
+### Render outputfile:
 ```
 ./Display_Release.exe [FILE]
 ```
+Press space to show animation of circles appearing in order
+
+### Scrambler:
+```
+./Scramble_Release.exe [FILE SCRAMBLE_TYPE]
+```
+Sort by:\
+[1] Random\
+[2] Distance from center
