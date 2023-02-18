@@ -6,25 +6,37 @@ int main(int argc, char** argv) {
 	std::string input;
 	std::string output;
 	double weighting;
+
+	std::vector<std::string> args = std::vector<std::string>();
+	for (int i = 0; i < argc; i++) {
+		args.emplace_back(argv[i]);
+	}
+
+	auto it = std::find_if(args.begin(), args.end(), [](const std::string& s) { return s.substr(0, 6) == "--out="; });
+	if (it != args.end()) {
+		output = it->substr(6);
+		args.erase(it);
+	}
 	
 	// Process Command line arguments
-	if (argc != 1 && argc != 4) {
-		std::cout << "Usage: ./Solver.exe [INPUTFILE OUTPUTFILE WEIGHTING]" << std::endl;
+	if (args.size() != 1 && args.size() != 3) {
+		std::cout << "Usage: ./Solver.exe [INPUTFILE WEIGHTING] [--out=OUTPUTFILE]" << std::endl;
 		return 1;
 	}
-	if (argc == 1) {
+	if (args.size() == 1) {
 		std::cout << "Inputfile:  ";
 		std::getline(std::cin, input);
-		std::cout << "Outputfile: ";
-		std::getline(std::cin, output);
 		std::cout << "Weighting:  ";
 		std::string weighting_str;
 		std::getline(std::cin, weighting_str);
 		weighting = weighting_str.empty() ? weighting = 0. : std::stod(weighting_str);
+		if (output.empty()) {
+			std::cout << "Outputfile: ";
+			std::getline(std::cin, output);
+		}
 	} else {
-		input = std::string(argv[1]);
-		output = std::string(argv[2]);
-		weighting = std::atof(argv[3]);
+		input = std::string(args[1]);
+		weighting = std::stod(args[2]);
 	}
 
 	auto startTime = std::chrono::high_resolution_clock::now();
@@ -41,9 +53,11 @@ int main(int argc, char** argv) {
 		return 3;
 	}
 
-	if (!s.writeOutput(result, output)) {
-		std::cout << "Failed to save output!" << std::endl;
-		return 4;
+	if (!output.empty()) {
+		if (!s.writeOutput(result, output)) {
+			std::cout << "Failed to save output!" << std::endl;
+			return 4;
+		}
 	}
 
 

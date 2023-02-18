@@ -17,5 +17,6 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "Solver"
 include "Solver_deep"
+include "Solver_weight"
 include "Display"
 include "Scramble"
