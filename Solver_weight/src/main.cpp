@@ -19,8 +19,8 @@ int main(int argc, char** argv) {
 	}
 	
 	// Process Command line arguments
-	if (args.size() != 1 && args.size() != 6) {
-		std::cout << "Usage: ./Solver.exe [INPUTFILE RADIUS_EXPONENT RADIUS_FACTOR COUNT_EXPONENT COUNT_FACTOR]\n\t\t[--out=OUTPUTFILE]" << std::endl;
+	if (args.size() != 1 && args.size() != 4) {
+		std::cout << "Usage: ./Solver.exe [INPUTFILE RADIUS_EXPONENT COUNT_EXPONENT]\n\t\t[--out=OUTPUTFILE]" << std::endl;
 		return 1;
 	}
 	if (args.size() == 1) {
@@ -32,17 +32,9 @@ int main(int argc, char** argv) {
 		std::getline(std::cin, weighting_str);
 		weighting.radiusExponent = weighting_str.empty() ? 0 : std::stoi(weighting_str);
 
-		std::cout << "Radius-Factor:   ";
-		std::getline(std::cin, weighting_str);
-		weighting.radiusFactor = weighting_str.empty() ? 1. : std::stod(weighting_str);
-
 		std::cout << "Count-Exponent:  ";
 		std::getline(std::cin, weighting_str);
 		weighting.countExponent = weighting_str.empty() ? 0 : std::stoi(weighting_str);
-
-		std::cout << "Count-Factor:    ";
-		std::getline(std::cin, weighting_str);
-		weighting.countFactor = weighting_str.empty() ? 1. : std::stod(weighting_str);
 
 		if (output.empty()) {
 			std::cout << "Outputfile:      ";
@@ -51,9 +43,7 @@ int main(int argc, char** argv) {
 	} else {
 		input = std::string(args[1]);
 		weighting.radiusExponent = std::stoi(args[2]);
-		weighting.radiusFactor = std::stod(args[3]);
-		weighting.countExponent = std::stoi(args[4]);
-		weighting.countFactor = std::stod(args[5]);
+		weighting.countExponent = std::stoi(args[3]);
 	}
 
 	auto startTime = std::chrono::high_resolution_clock::now();

@@ -19,9 +19,7 @@
 struct Connection;
 
 struct Weighting {
-	double radiusFactor;
 	int radiusExponent;
-	double countFactor;
 	int countExponent;
 };
 

@@ -52,10 +52,6 @@ bool Solver::init(const std::string& inputfile, Weighting weighting)
 		std::cout << "Weighting-Exponents must be even and greater than or equal to 0" << std::endl;
 		loaded = false;
 		return false;
-	} else if (weighting.countFactor <= 0. || weighting.radiusFactor <= 0.) {
-		std::cout << "Weighting-Factors must be greater than 0" << std::endl;
-		loaded = false;
-		return false;
 	}
 	this->weighting = weighting;
 
@@ -277,9 +273,8 @@ void Solver::stepWeights() {
 	double maxWeight = 0.;
 	std::vector<double> weights = std::vector<double>();
 	for (int i = 0; i < types.size(); i++) {
-		//double weight = types[i].sizeMultiplier * (1. - types[i].count*types[i].sizeMultiplier / numBlocks);
-		double radiusWeight = weighting.radiusFactor * std::pow(types[i].radiusPercent, weighting.radiusExponent);
-		double countWeight = weighting.countFactor * (std::pow(1 - std::min(1., types[i].count / numBlocks), weighting.countExponent));
+		double radiusWeight = std::pow(types[i].radiusPercent, weighting.radiusExponent);
+		double countWeight = (std::pow(1 - std::min(1., types[i].count / numBlocks), weighting.countExponent));
 
 		double weight = radiusWeight * countWeight;
 		weights.push_back(weight);
