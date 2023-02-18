@@ -13,10 +13,6 @@ int main(int argc, char** argv) {
 		args.emplace_back(argv[i]);
 	}
 
-	for (auto& a : args) {
-		std::cout << a << std::endl;
-	}
-
 	auto it = std::find(args.begin(), args.end(), "--no-outfile");
 	if (it != args.end()) {
 		outfile = false;

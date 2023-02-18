@@ -86,7 +86,6 @@ struct Circle {
 };
 
 struct Connection {
-	int index;
 	ConnType type;
 	std::shared_ptr<Circle> c1;
 	union {
@@ -98,15 +97,13 @@ struct Connection {
 	bool left = true;
 
 	Connection(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, bool left)
-		: type(ConnType::CIRCLE), c1(c1), c2(c2), left(left) {
-		index = std::min(c1->index, c2->index);
-	}
+		: type(ConnType::CIRCLE), c1(c1), c2(c2), left(left) { }
 
 	Connection(std::shared_ptr<Circle> c1, Wall wall, bool left)
-		: type(ConnType::WALL), c1(c1), wall(wall), left(left), index(c1->index) { }
+		: type(ConnType::WALL), c1(c1), wall(wall), left(left) { }
 
 	Connection(Corner corner)
-		: type(ConnType::CORNER), c1(nullptr), corner(corner), index(0) { }
+		: type(ConnType::CORNER), c1(nullptr), corner(corner) { }
 
 	virtual ~Connection() {}
 

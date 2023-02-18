@@ -90,7 +90,6 @@ void Solver::reset() {
 * Reads input from file and calculates some basic data
 */
 bool Solver::readInput(const std::string& path) {
-	std::cout << "Reading inputfile" << std::endl;
 	std::ifstream file;
 	file.open(path, std::ios::in);
 	if (!file.is_open()) {
@@ -139,8 +138,6 @@ bool Solver::readInput(const std::string& path) {
 	}
 	radiusMap[0.] = 0;
 
-	std::cout << "Finished reading inputfile" << std::endl;
-
 	return true;
 }
 
@@ -174,8 +171,6 @@ Result Solver::run() {
 		return Result();
 	};
 
-	std::cout << "Starting computation" << std::endl;
-
 	double size = 0.;
 	double maxB = 0.;
 	double maxA = 0.;
@@ -207,7 +202,8 @@ Result Solver::run() {
 			std::sort(conns_calculated.begin(), conns_calculated.end(), [](const std::shared_ptr<Connection>& a, const std::shared_ptr<Connection>& b) {
 				if (a->maxRadius != b->maxRadius) return a->maxRadius < b->maxRadius;
 				if (a->type != b->type) return a->type < b->type;
-				return a->index < b->index;
+				if (a->type == ConnType::CORNER) return true;
+				return a->c1->index < b->c1->index;
 			});
 
 			circles.push_back(circle);
