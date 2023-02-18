@@ -26,7 +26,7 @@ $ make 04 config=release
 The executables can be found in `bin` and are copied to `inputs` or `results` after building
 
 ```
-./Solver.exe [INPUTFILE OUTPUTFILE WEIGHTING]
+./Solver.exe [INPUTFILE WEIGHTING] [--out=OUTPUTFILE]
 ```
 Weighting:\
 0-1 => constant to linear\

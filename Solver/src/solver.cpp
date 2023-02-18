@@ -246,6 +246,7 @@ finished:
 	std::cout << "Result:\n";
 
 	std::cout << "Max: " << maxB << " = " << maxA << " * " << maxD << " (" << circleCountAtMax << " circles)" << std::endl;
+	std::cout << "C: " << maxB * types.size() / (types.size() - 1) << std::endl;
 
 #ifdef DRAW_SDL
 	bool c = false;

@@ -19,7 +19,7 @@ def computePoints(id: int, file: str, start: float, end: float, count: int):
     weight = start + part * id
     partEnd = start + part * (id + 1)
     while weight < partEnd:
-        p = subprocess.Popen(["./../inputs/Solver_Release.exe",  "--no-outfile", f"./../inputs/{file}.txt", str(weight)], stdout=subprocess.PIPE)
+        p = subprocess.Popen(["./../inputs/Solver_Release.exe", f"./../inputs/{file}.txt", str(weight)], stdout=subprocess.PIPE)
         output = str(p.communicate()[0]).split("\\r\\n")[-3]
         if output == None: break
         m = re.match("Max: (\d*\.\d*) = (\d*\.\d*) \* (\d*\.\d*) .*", output)
