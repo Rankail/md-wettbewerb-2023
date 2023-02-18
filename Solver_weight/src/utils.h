@@ -19,8 +19,8 @@
 struct Connection;
 
 struct Weighting {
-	int radiusExponent;
-	int countExponent;
+	double radiusExponent;
+	double countExponent;
 };
 
 struct CircleType {

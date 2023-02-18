@@ -47,9 +47,8 @@ bool Solver::init(const std::string& inputfile, Weighting weighting)
 	loaded = readInput(inputfile);
 	if (!loaded) return false;
 
-	if (weighting.countExponent < 0 || (weighting.countExponent % 2 != 0 && weighting.countExponent != 1) ||
-		weighting.radiusExponent < 0 || (weighting.radiusExponent % 2 != 0 && weighting.radiusExponent != 1)) {
-		std::cout << "Weighting-Exponents must be even and greater than or equal to 0" << std::endl;
+	if (weighting.countExponent < 0 || weighting.radiusExponent < 0) {
+		std::cout << "Weighting-Exponents must be greater than or equal to 0" << std::endl;
 		loaded = false;
 		return false;
 	}

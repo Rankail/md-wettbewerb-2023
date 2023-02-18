@@ -30,11 +30,11 @@ int main(int argc, char** argv) {
 		std::string weighting_str;
 		std::cout << "Radius-Exponent: ";
 		std::getline(std::cin, weighting_str);
-		weighting.radiusExponent = weighting_str.empty() ? 0 : std::stoi(weighting_str);
+		weighting.radiusExponent = weighting_str.empty() ? 0. : std::stod(weighting_str);
 
 		std::cout << "Count-Exponent:  ";
 		std::getline(std::cin, weighting_str);
-		weighting.countExponent = weighting_str.empty() ? 0 : std::stoi(weighting_str);
+		weighting.countExponent = weighting_str.empty() ? 0. : std::stod(weighting_str);
 
 		if (output.empty()) {
 			std::cout << "Outputfile:      ";
