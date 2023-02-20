@@ -1,5 +1,5 @@
 ## Maxima
-Stand: 17.02.2023
+Stand: 20.02.2023 23:22
 
 | test-case | B | Gewichtung |
 |-----------|---|------------|
