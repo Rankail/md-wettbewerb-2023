@@ -318,7 +318,7 @@ void Solver::updateConnections(const std::shared_ptr<Circle>& circle) {
 		dx = std::abs(circle->cx - conn->c1->cx);
 		dy = std::abs(circle->cy - conn->c1->cy);
 	} else if (conn->type == ConnType::CIRCLE) {
-		r = circle->r + conn->maxRadius * 2 + std::max(conn->c1->r, conn->c2->r);
+		r = circle->r + conn->maxRadius * 2 + std::max(conn->c1->r, conn->c2->r);x
 		dx = std::min(std::abs(circle->cx - conn->c1->cx), std::abs(circle->cx - conn->c2->cx));
 		dy = std::min(std::abs(circle->cy - conn->c1->cy), std::abs(circle->cy - conn->c2->cy));
 	}

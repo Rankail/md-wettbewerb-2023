@@ -16,7 +16,7 @@ void scrambleRandom(std::vector<std::string>& lines) {
 	std::shuffle(lines.begin(), lines.end(), g);
 }
 
-void sortCenterDistance(std::vector<std::string>& lines) {
+void sortCenterDistance(std::vector<std::string>& lines, double w, double h) {
 	std::vector<Circle> distances = std::vector<Circle>();
 	double maxX = 0., maxY = 0.;
 	for (auto& line : lines) {
@@ -27,11 +27,7 @@ void sortCenterDistance(std::vector<std::string>& lines) {
 		double cy = std::stod(line.substr(s1, s2));
 		double r = std::stod(line.substr(s2, s3));
 		distances.emplace_back(Circle{cx, cy, r, line});
-		maxX = std::max(maxX, cx);
-		maxY = std::max(maxY, cy);
 	}
-	double w = std::ceil(maxX / 100.) * 100.;
-	double h = std::ceil(maxY / 100.) * 100.;
 
 	std::sort(distances.begin(), distances.end(), [&](const Circle& a, const Circle& b) {
 		double adx = std::abs(a.cx - w / 2.);
@@ -48,17 +44,28 @@ void sortCenterDistance(std::vector<std::string>& lines) {
 }
 
 int main(int argc, char** argv) {
-	if (argc < 1 || argc > 3) {
-		std::cout << "Usage: ./Scramble.exe [FILE] [option]" << std::endl;
+	if (argc != 1 && argc != 4 && argc != 5) {
+		std::cout << "Usage: ./Scramble.exe [FILE W H] [option]" << std::endl;
 		return 1;
 	}
 
 	std::string path;
+	double w, h;
 	if (argc == 1) {
-		std::cout << "File: ";
+		std::cout << "File:   ";
 		std::getline(std::cin, path);
+
+		std::string line;
+		std::cout << "Width:  ";
+		std::getline(std::cin, line);
+		w = (double)std::stoi(line);
+		std::cout << "Height: ";
+		std::getline(std::cin, line);
+		h = (double)std::stoi(line);
 	} else {
 		path = argv[1];
+		w = (double)std::atoi(argv[2]);
+		h = (double)std::atoi(argv[3]);
 	}
 
 	std::ifstream ifile;
@@ -76,14 +83,14 @@ int main(int argc, char** argv) {
 	ifile.close();
 
 	std::string option;
-	if (argc == 3) {
-		option = argv[2];
+	if (argc == 5) {
+		option = argv[4];
 		if (option != "1" && option != "2") {
 			std::cout << "Please enter a valid option (1,2)" << std::endl;
-			argc = 2;
+			argc = 4;
 		}
 	}
-	if (argc < 3) {
+	if (argc < 5) {
 		std::cout << "[1] Random\n[2] Distance from Center" << std::endl;
 		std::string s;
 		std::getline(std::cin, s);
@@ -99,7 +106,7 @@ int main(int argc, char** argv) {
 		scrambleRandom(lines);
 	} else if (option == "2") {
 		std::cout << "Distance from Center" << std::endl;
-		sortCenterDistance(lines);
+		sortCenterDistance(lines, w, h);
 	}
 
 	std::ofstream ofile;

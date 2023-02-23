@@ -90,7 +90,11 @@ struct ConnectionFuture {
 	std::shared_ptr<Circle> circle;
 	double score;
 
-	ConnectionFuture() : score(-1.), circle(nullptr) {}
+	ConnectionFuture() : score(-1.), circle(nullptr), conns() {}
+
+	static std::shared_ptr<ConnectionFuture> create(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns) {
+		return std::make_shared<ConnectionFuture>(circle, conns);
+	}
 };
 
 struct Connection {
@@ -174,24 +178,6 @@ struct Connection {
 		os << " left=" << c->left;
 		os << ">";
 		return os;
-	}
-};
-
-struct PossibleCircle : std::enable_shared_from_this<PossibleCircle> {
-	std::vector<std::shared_ptr<Connection>> conns;
-	std::shared_ptr<Circle> circle;
-	double maxRadius = 0.;
-
-	PossibleCircle(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns)
-		: conns(conns), circle(circle) { }
-
-	static std::shared_ptr<PossibleCircle> create(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns) {
-		return std::make_shared<PossibleCircle>(circle, conns);
-	}
-
-	std::shared_ptr<PossibleCircle> setMaxRadius(double maxRadius) {
-		this->maxRadius = maxRadius;
-		return shared_from_this();
 	}
 };
 

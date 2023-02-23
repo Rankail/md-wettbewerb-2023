@@ -4,16 +4,36 @@
 
 /*
 * Plan:
-* - testing for fit -> only test actual radius we are trying to fit in
-*	- cache that in map<radius, PossibleCircle> of circle
-* - also mark if doesnt fit for that radius (flag/nullptr?)
-* => need to search all of them again or end if circle with at least to nextconns with biggest radius or similiar is found?
+* Connections: map<eadius, PossiblCircle+score>
+* Not calcultaed -> no key
+* Needs recalculation -> score == -1
+* Not placable -> score == 0
 * 
-* !cant tell if another circle fits just because a smaller or larger one doesn't
+* Placing:
+* Break-score (as cmd argument?)
+* Break-score can't have been calculated (would have been selected instantly
+* For all connections:
+* score == 0 -> skip
+* no key -> caclulate full
+* score == -1 -> recalculate
+* if score >= break-score -> return that
+* after calculating all -> take best
 * 
-* - use nextconns directly if a placement is chosen
+* Clearing after palcing:
+* Circle in range -> score == -1
+* else any conn in range -> score == -1
 * 
-* linked-List (list) instead of vector? fast moving/removing but slower sort
+* Calculating:
+* Create circle of radius with conn -> create all subconns and save in map -> calc score
+* -> score == 0; zeroCount == 4 -> delete conn (only with new calc; needs to really check all on recalc 0)
+* 
+* Recalculating (score == -1):
+* circle collides? -> remove radius
+* else -> calc "maxRadius?" for all subconns
+* 
+* 
+* Dynamic-Break-Score:
+* - based on radius?
 * 
 */
 
@@ -91,7 +111,8 @@ void Solver::reset() {
 		type.count = 0;
 	}
 
-	conns = std::list<std::shared_ptr<Connection>>();
+	conns_remove = std::vector<std::shared_ptr<Connection>>();
+	conns = std::vector<std::shared_ptr<Connection>>();
 
 	conns.push_back(Connection::create(Corner::TL));
 	conns.push_back(Connection::create(Corner::TR));
@@ -202,7 +223,7 @@ Result Solver::run() {
 			if (type.weight < 1.) continue;
 			type.weight--;
 
-			std::shared_ptr<PossibleCircle> pc = getNextCircle(type);
+			auto pc = getNextCircle(type);
 			if (pc == nullptr) continue;
 			std::shared_ptr<Circle> circle = pc->circle;
 
@@ -282,87 +303,111 @@ finished:
 */
 void Solver::stepWeights() {
 	double maxWeight = 0.;
-	std::vector<double> weights = std::vector<double>();
-	for (int i = 0; i < types.size(); i++) {
-		//double weight = types[i].sizeMultiplier * (1. - types[i].count*types[i].sizeMultiplier / numBlocks);
-
+	for (auto& t : types) {
 		double weight;
-		if (weighting <= 1.) weight = (weighting * weighting * types[i].r) + (1. - weighting * weighting);
-		else weight = types[i].r * (std::pow(weighting-1., 5.) * types[i].r + (1. - std::pow(weighting-1., 5.)));
-		weights.push_back(weight);
+		if (weighting <= 1.) weight = (weighting * weighting * t.r) + (1. - weighting * weighting);
+		else weight = t.r * (std::pow(weighting-1., 5.) * t.r + (1. - std::pow(weighting-1., 5.)));
+		t.weight = weight;
 		maxWeight = std::max(maxWeight, weight);
 	}
 
-	for (int i = 0; i < types.size(); i++) {
-		types[i].weight += weights[i] / maxWeight;
+	for (auto& t : types) {
+		t.weight += t.weight / maxWeight;
 	}
 }
 
 // marks Connections as unkown if they are possibly clliding with the provided circle
 void Solver::updateConnections(const std::shared_ptr<Circle>& circle) {
-	auto partition = std::stable_partition(conns.begin(), conns.end(), [&](const std::shared_ptr<Connection>& conn) {
+	for (auto& conn : conns) {
+		conn->maxRadius = 0;
+		for (auto& [r, fc] : conn->cache) {
 			double dx = 0., dy = 0., r = 0.;
-		if (conn->type == ConnType::CORNER) {
-			r = conn->maxRadius * 2 + circle->r;
-			switch (conn->corner) {
-			case Corner::TL: {
-				dx = std::abs(circle->cx - conn->maxRadius);
-				dy = std::abs(circle->cy - conn->maxRadius);
-				break;
-			}
-			case Corner::TR: {
-				dx = std::abs(circle->cx - (w - conn->maxRadius));
-				dy = std::abs(circle->cy - conn->maxRadius);
-				break;
-			}
-			case Corner::BL: {
-				dx = std::abs(circle->cx - conn->maxRadius);
-				dy = std::abs(circle->cy - (h - conn->maxRadius));
-				break;
-			}
-			case Corner::BR: {
-				dx = std::abs(circle->cx - (w - conn->maxRadius));
-				dy = std::abs(circle->cy - (h - conn->maxRadius));
-				break;
-			}
-		}
-		} else if (conn->type == ConnType::WALL) {
-			r = circle->r + conn->maxRadius * 2 + conn->c1->r;
-			dx = std::abs(circle->cx - conn->c1->cx);
-			dy = std::abs(circle->cy - conn->c1->cy);
-		} else if (conn->type == ConnType::CIRCLE) {
-			r = circle->r + conn->maxRadius * 2 + std::max(conn->c1->r, conn->c2->r);
-			dx = std::min(std::abs(circle->cx - conn->c1->cx), std::abs(circle->cx - conn->c2->cx));
-			dy = std::min(std::abs(circle->cy - conn->c1->cy), std::abs(circle->cy - conn->c2->cy));
-		}
-		if (dx * dx + dy * dy > r * r) return;
 
-		conn->cache[r]->score = -1.;
-	});
+			auto& fcir = fc->circle;
+			dx = circle->cx - fcir->cx;
+			dx = circle->cy - fcir->cy;
+			r = circle->r + r;
+			if (dx * dx + dy * dy > r * r) {
+				fc->score = 0;
+				continue;
+			}
+
+			conn->maxRadius = std::max(conn->maxRadius, r);
+
+			for (auto& sc : fc->conns) {
+				if (sc->type == ConnType::CORNER) {
+					r = sc->maxRadius * 2 + circle->r;
+					switch (sc->corner) {
+						case Corner::TL: {
+							dx = std::abs(circle->cx - sc->maxRadius);
+							dy = std::abs(circle->cy - sc->maxRadius);
+							break;
+						}
+						case Corner::TR: {
+							dx = std::abs(circle->cx - (w - sc->maxRadius));
+							dy = std::abs(circle->cy - sc->maxRadius);
+							break;
+						}
+						case Corner::BL: {
+							dx = std::abs(circle->cx - sc->maxRadius);
+							dy = std::abs(circle->cy - (h - sc->maxRadius));
+							break;
+						}
+						case Corner::BR: {
+							dx = std::abs(circle->cx - (w - sc->maxRadius));
+							dy = std::abs(circle->cy - (h - sc->maxRadius));
+							break;
+						}
+					}
+				} else if (sc->type == ConnType::WALL) {
+					r = circle->r + sc->maxRadius * 2 + sc->c1->r;
+					dx = std::abs(circle->cx - sc->c1->cx);
+					dy = std::abs(circle->cy - sc->c1->cy);
+				} else if (sc->type == ConnType::CIRCLE) {
+					r = circle->r + sc->maxRadius * 2 + std::max(sc->c1->r, sc->c2->r);
+					dx = std::min(std::abs(circle->cx - sc->c1->cx), std::abs(circle->cx - sc->c2->cx));
+					dy = std::min(std::abs(circle->cy - sc->c1->cy), std::abs(circle->cy - sc->c2->cy));
+				}
+				if (dx * dx + dy * dy > r * r) continue;
+
+				conn->cache[r]->score = -1;
+			}
+		}
+	}
+
+	conns.erase(std::remove_if(conns.begin(), conns.end(), [](const std::shared_ptr<Connection>& c) { c->maxRadius == 0; }), conns.end());
 }
 
 /*
 * tries to find the best position for a Circle of the provided type
 */
 std::shared_ptr<ConnectionFuture> Solver::getNextCircle(CircleType& t) {
-	for (auto& conn : conns) {
-		if (conn->cache[t.r]->score == 1.) {
+	const double break_score = std::numeric_limits<double>::max();
+	//only needed if break_score is dynamic
+	/*for (auto& conn : conns) { 
+		if (conn->cache[t.r]->score >= break_score) {
 			return conn->cache[t.r];
 		}
-	}
+	}*/
 
-	// calculate until perfect match found
+	// calculate until break-score is found
 	for (auto it = conns.rbegin(); it != conns.rend(); ++it) {
 		auto& conn = *it;
-		if (conn->cache[t.r]->score != -1.) continue;
-		calcRadiiFuture(conn, t.r);
-		//found 1-Score?
-		if (conn->cache[t.r]->score == 1.) {
+		
+		// recalc, calc, skip based on value
+		auto fc = conn->cache.find(t.r);
+		if (fc == conn->cache.end()) calcRadiiFuture(conn, t.r);
+		else if(fc->second->score == -1) recalcRadiiFuture(conn, t.r);
+		else if (fc->second->score == 0) continue;
+
+		//found break-Score?
+		if (conn->cache[t.r]->score >= break_score) {
 			return conn->cache[t.r];
 		}
 	}
 
-	// no perfect match => find next best
+
+	// no break-score => find next best
 	auto nextBest = std::max_element(conns.begin(), conns.end(), [&](const std::shared_ptr<Connection>& conn) {
 		return conn->cache[t.r]->score;
 	});
@@ -392,31 +437,46 @@ bool Solver::connInRange(const std::shared_ptr<Circle>& circle, const std::share
 }
 
 void Solver::calcRadiiFuture(std::shared_ptr<Connection>& conn, double r) {
-	auto cf = conn->cache[r];
-	if (cf->score == -1.) {
-		if (cf->circle == nullptr) {
-			auto pc = getCircleFromConnection(conn, r);
-			double score = 0;
-			cf->circle = pc->circle;
-			cf->conns = pc->conns;
-			for (auto& c : pc->conns) {
-				calcMaxRadiusConnection(conn);
-			}
-		} else {
-			if (!checkValid(cf->circle->cx, cf->circle->cy, cf->circle->r)) {
-				cf->score = 0.;
-				return;
-			} else {
-				for (auto& c : cf->conns) {
-					calcMaxRadiusConnection(c);
-				}
-			}
+	auto fc = conn->cache[r];
+
+	auto pc = getCircleFromConnection(conn, r);
+	double score = 0;
+	fc->circle = pc->circle;
+	fc->conns = pc->conns;
+	fc->score = 0.;
+	for (auto& c : pc->conns) {
+		calcMaxRadiusConnection(conn);
+		fc->score += c->maxRadius;
+	}
+
+	//delete?
+	if (fc->score != 0) return;
+	for (auto const& [r, sfc] : conn->cache) {
+		if (sfc->score != 0) return;
+	}
+	//delete!
+	conn->maxRadius = 0;
+}
+
+void Solver::recalcRadiiFuture(std::shared_ptr<Connection>& conn, double r) {
+	auto& fc = conn->cache[r];
+	if (!checkValid(fc->circle->cx, fc->circle->cy, fc->circle->r)) {
+		fc->score = 0;
+	} else {
+		fc->score = 0;
+		for (auto& c : fc->conns) {
+			calcMaxRadiusConnection(c);
+			fc->score += c->maxRadius;
 		}
 	}
-	cf->score = 0.;
-	for (auto& c : cf->conns) {
-		cf->score += (radiusMap.size() - radiusMap[c->maxRadius]) / radiusMap.size() * 0.4;
+
+	//delete?
+	if (fc->score != 0) return;
+	for (auto const& [r, sfc] : conn->cache) {
+		if (sfc->score != 0) return;
 	}
+	//delete!
+	conn->maxRadius = 0;
 }
 
 void Solver::calcMaxRadiusConnection(std::shared_ptr<Connection>& conn) {
@@ -513,7 +573,7 @@ void Solver::calcMaxRadiusConnectionCircle(std::shared_ptr<Connection>& conn) {
 /*
 * Constructs a Circle and its connections from another Connection
 */
-std::shared_ptr<PossibleCircle> Solver::getCircleFromConnection(std::shared_ptr<Connection>& conn, double r) {
+std::shared_ptr<ConnectionFuture> Solver::getCircleFromConnection(std::shared_ptr<Connection>& conn, double r) {
 	if (conn->type == ConnType::CIRCLE) {
 		return getCircleFromCircle(conn->c1, conn->c2, r, conn->left);
 	} else if (conn->type == ConnType::WALL) {
@@ -527,8 +587,8 @@ std::shared_ptr<PossibleCircle> Solver::getCircleFromConnection(std::shared_ptr<
 /*
 * Constructs a circle from a corner-connection
 */
-std::shared_ptr<PossibleCircle> Solver::getCirclFromCorner(Corner corner, double r) {
-	std::shared_ptr<PossibleCircle> pc;
+std::shared_ptr<ConnectionFuture> Solver::getCirclFromCorner(Corner corner, double r) {
+	std::shared_ptr<ConnectionFuture> pc;
 	std::shared_ptr<Circle> c;
 	std::vector<std::shared_ptr<Connection>> conns = std::vector<std::shared_ptr<Connection>>();
 	if (corner == Corner::TL) {
@@ -557,13 +617,13 @@ std::shared_ptr<PossibleCircle> Solver::getCirclFromCorner(Corner corner, double
 		conns.push_back(Connection::create(c, Wall::DOWN, false));
 	}
 	c->index = iteration;
-	return PossibleCircle::create(c, conns);
+	return ConnectionFuture::create(c, conns);
 }
 
 /*
 * Constructs a circle from a wall-circle-connection
 */
-std::shared_ptr<PossibleCircle> Solver::getCircleFromWall(std::shared_ptr<Connection>& conn, double r) {
+std::shared_ptr<ConnectionFuture> Solver::getCircleFromWall(std::shared_ptr<Connection>& conn, double r) {
 	double wd = 2 * std::sqrt(conn->c1->r * r) * (conn->left ? 1 : -1);
 	std::shared_ptr<Circle> c = nullptr;
 	if (conn->wall == Wall::UP) {
@@ -581,13 +641,13 @@ std::shared_ptr<PossibleCircle> Solver::getCircleFromWall(std::shared_ptr<Connec
 	conns.emplace_back(Connection::create(c, conn->c1, false));
 	conns.emplace_back(Connection::create(c, conn->wall, true));
 	conns.emplace_back(Connection::create(c, conn->wall, false));
-	return PossibleCircle::create(c, conns);
+	return ConnectionFuture::create(c, conns);
 }
 
 /*
 * Constructs a circle from a circle-circle-connection
 */
-std::shared_ptr<PossibleCircle> Solver::getCircleFromCircle(std::shared_ptr<Circle>& c1, std::shared_ptr<Circle>& c2, double r, bool left) {
+std::shared_ptr<ConnectionFuture> Solver::getCircleFromCircle(std::shared_ptr<Circle>& c1, std::shared_ptr<Circle>& c2, double r, bool left) {
 	std::shared_ptr<Circle> n;
 	if (left) n = circleFromTwoCircles(c1, c2, r);
 	else n = circleFromTwoCircles(c2, c1, r);
@@ -597,7 +657,7 @@ std::shared_ptr<PossibleCircle> Solver::getCircleFromCircle(std::shared_ptr<Circ
 	conns.emplace_back(Connection::create(n, c1, false));
 	conns.emplace_back(Connection::create(n, c2, true));
 	conns.emplace_back(Connection::create(n, c2, false));
-	return PossibleCircle::create(n, conns);
+	return ConnectionFuture::create(n, conns);
 }
 
 /*

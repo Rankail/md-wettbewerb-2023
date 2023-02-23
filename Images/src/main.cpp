@@ -2,10 +2,104 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 #include <iostream>
+#include <algorithm>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+struct RGB {
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+};
+
+struct HSV {
+	unsigned char h;
+	unsigned char s;
+	unsigned char v;
+};
+
+RGB hexToRGB(int32_t hex) {
+	RGB out;
+	out.r = (hex >> 16) & 0xff;
+	out.g = (hex >> 8) & 0xff;
+	out.b = hex & 0xff;
+	return out;
+}
+
+RGB hsvToRgb(HSV hsv) {
+	RGB rgb;
+	unsigned char region, remainder, p, q, t;
+
+	if (hsv.s == 0) {
+		rgb.r = hsv.v;
+		rgb.g = hsv.v;
+		rgb.b = hsv.v;
+		return rgb;
+	}
+
+	region = hsv.h / 43;
+	remainder = (hsv.h - (region * 43)) * 6;
+
+	p = (hsv.v * (255 - hsv.s)) >> 8;
+	q = (hsv.v * (255 - ((hsv.s * remainder) >> 8))) >> 8;
+	t = (hsv.v * (255 - ((hsv.s * (255 - remainder)) >> 8))) >> 8;
+
+	switch (region) {
+		case 0:
+			rgb.r = hsv.v; rgb.g = t; rgb.b = p;
+			break;
+		case 1:
+			rgb.r = q; rgb.g = hsv.v; rgb.b = p;
+			break;
+		case 2:
+			rgb.r = p; rgb.g = hsv.v; rgb.b = t;
+			break;
+		case 3:
+			rgb.r = p; rgb.g = q; rgb.b = hsv.v;
+			break;
+		case 4:
+			rgb.r = t; rgb.g = p; rgb.b = hsv.v;
+			break;
+		default:
+			rgb.r = hsv.v; rgb.g = p; rgb.b = q;
+			break;
+	}
+
+	return rgb;
+}
+
+HSV rgbToHsv(RGB rgb) {
+	HSV hsv;
+	unsigned char rgbMin, rgbMax;
+
+	rgbMin = rgb.r < rgb.g ? (rgb.r < rgb.b ? rgb.r : rgb.b) : (rgb.g < rgb.b ? rgb.g : rgb.b);
+	rgbMax = rgb.r > rgb.g ? (rgb.r > rgb.b ? rgb.r : rgb.b) : (rgb.g > rgb.b ? rgb.g : rgb.b);
+
+	hsv.v = rgbMax;
+	if (hsv.v == 0) {
+		hsv.h = 0;
+		hsv.s = 0;
+		return hsv;
+	}
+
+	hsv.s = 255 * long(rgbMax - rgbMin) / hsv.v;
+	if (hsv.s == 0) {
+		hsv.h = 0;
+		return hsv;
+	}
+
+	if (rgbMax == rgb.r)
+		hsv.h = 0 + 43 * (rgb.g - rgb.b) / (rgbMax - rgbMin);
+	else if (rgbMax == rgb.g)
+		hsv.h = 85 + 43 * (rgb.b - rgb.r) / (rgbMax - rgbMin);
+	else
+		hsv.h = 171 + 43 * (rgb.r - rgb.g) / (rgbMax - rgbMin);
+
+	return hsv;
+}
 
 struct CircleType {
 	int index;
@@ -15,53 +109,10 @@ struct CircleType {
 struct Circle {
 	double cx, cy, r;
 	int type;
-};
 
-//static void drawCircle(SDL_Renderer* renderer, Circle& c) {
-//	int color = ((c.type >> 16) ^ c.type) * 0x45d9f3b;
-//	color = ((color >> 16) ^ color) * 0x45d9f3b;
-//	color = (color >> 16) ^ color;
-//	uint8_t r = 0x80 + ((color >> 16) ^ 0xff) / 2;
-//	uint8_t g = 0x80 + ((color >> 8) ^ 0xff) / 2;
-//	uint8_t b = 0x80 + (color ^ 0xff) / 2;
-//	SDL_SetRenderDrawColor(renderer, r, g, b, 0xff);
-//
-//	int32_t cx = (int32_t)c.cx;
-//	int32_t cy = (int32_t)c.cy;
-//	const int32_t diameter = (int32_t)(c.r * 2.);
-//
-//	int32_t x = (int32_t)c.r - 1;
-//	int32_t y = 0;
-//	int32_t tx = 1;
-//	int32_t ty = 1;
-//	int32_t error = tx - diameter;
-//
-//	while (x >= y)
-//	{
-//		SDL_RenderDrawPoint(renderer, cx + x, cy - y);
-//		SDL_RenderDrawPoint(renderer, cx + x, cy + y);
-//		SDL_RenderDrawPoint(renderer, cx - x, cy - y);
-//		SDL_RenderDrawPoint(renderer, cx - x, cy + y);
-//		SDL_RenderDrawPoint(renderer, cx + y, cy - x);
-//		SDL_RenderDrawPoint(renderer, cx + y, cy + x);
-//		SDL_RenderDrawPoint(renderer, cx - y, cy - x);
-//		SDL_RenderDrawPoint(renderer, cx - y, cy + x);
-//
-//		if (error <= 0)
-//		{
-//			++y;
-//			error += ty;
-//			ty += 2;
-//		}
-//
-//		if (error > 0)
-//		{
-//			--x;
-//			tx += 2;
-//			error += (tx - diameter);
-//		}
-//	}
-//}
+	Circle(double cx, double cy, double r, int32_t type)
+		: cx(cx), cy(cy), r(r), type(type) { }
+};
 
 int main(int argc, char** argv) {
 	if (argc != 4 && argc != 1) {
@@ -106,31 +157,72 @@ int main(int argc, char** argv) {
 		ti++;
 	}
 
-	double maxRadius = std::max(types[4].radius, std::max(types[5].radius, types[7].radius));
+	std::sort(types.begin(), types.end(), [](const CircleType& a, const CircleType& b) { return a.radius < b.radius; });
 
 	inFile.close();
 
 	int iw, ih, channels;
-	unsigned char* data = stbi_load(image.c_str(), &iw, &ih, &channels, 1);
+	unsigned char* data = stbi_load(image.c_str(), &iw, &ih, &channels, 0);
 	if (data == NULL) {
 		std::cout << "Failed to read image" << std::endl;
 		return 4;
 	}
 
-	std::vector<std::string> colors = std::vector<std::string>();
-	for (int i = 0; i < iw * ih; i++) {
-		unsigned char* offset = data + i * channels;
-		unsigned char r = offset[0];
-		unsigned char g = offset[1];
-		unsigned char b = offset[2];
-		std::string color = std::to_string((int)r) + " " + std::to_string((int)g) + " " + std::to_string((int)b);
-		if (std::find(colors.begin(), colors.end(), color) == colors.end()) {
-			colors.push_back(color);
+	int32_t circleColors[8] = {0x000000, 0x9400D3, 0x009E73, 0x56B4E9, 0xE69F00, 0xF0E442, 0x0072B2, 0xE51E10};
+
+	std::vector<int32_t> colors = std::vector<int32_t>();
+	for (int j = 0; j < ih; j++) {
+		for (int i = 0; i < iw; i++) {
+			unsigned char* offset = data + (i + j * iw) * channels;
+			unsigned char r = offset[0];
+			unsigned char g = offset[1];
+			unsigned char b = offset[2];
+			int32_t color = (r << 16) + (g << 8) + b;
+			if (color == 0xFFFFFF) continue;
+			if (std::find(colors.begin(), colors.end(), color) == colors.end()) {
+				colors.push_back(color);
+			}
 		}
 	}
 
+	std::unordered_map<int32_t, int32_t> colorMap = std::unordered_map<int32_t, int32_t>();
 	for (auto& c : colors) {
-		std::cout << c << std::endl;
+		int minDiff = 255 * 3 + 1;
+		int idx = 0;
+		for (int i = 0; i < 8; i++) {
+			HSV c2 = rgbToHsv(hexToRGB(c));
+			HSV c1 = rgbToHsv(hexToRGB(circleColors[i]));
+			int32_t diffH = std::abs(c1.h - c2.h);
+			int32_t diffS = std::abs(c1.s - c2.s);
+			int32_t diffV = std::abs(c1.v - c2.v);
+			int32_t diff = diffH + diffS + diffV;
+			if (diff < minDiff) {
+				minDiff = diff;
+				idx = i;
+			}
+		}
+		colorMap[c] = idx;
+	}
+
+	/*colorMap[16777215] = 5;
+	colorMap[16763981] = 5;
+	colorMap[15161968] = 7;
+	colorMap[6702336] = 4;*/
+
+	double maxDiameter = types[7].radius * 2.;
+	double scale = 1.5;
+	double gapScale = 1;
+	std::vector<Circle> circles = std::vector<Circle>();
+	for (double j = 0; j < ih; j += 1. / scale) {
+		for (double i = 0; i < iw; i += 1. / scale) {
+			unsigned char* offset = data + ((int)i + (int)j * iw) * channels;
+			unsigned char r = offset[0];
+			unsigned char g = offset[1];
+			unsigned char b = offset[2];
+			int32_t color = (r << 16) + (g << 8) + b;
+			if (color == 0xFFFFFF) continue;
+			circles.emplace_back((i + .5) * scale * maxDiameter * gapScale, (ih - j + .5) * scale * maxDiameter * gapScale, types[colorMap[color]].radius, types[colorMap[color]].index);
+		}
 	}
 
 	stbi_image_free(data);
@@ -142,91 +234,14 @@ int main(int argc, char** argv) {
 		return 3;
 	}
 
-	double x = 0.;
-	for (auto& t : types) {
-		outFile << x + t.radius << " " << t.radius << " " << t.radius << " " << t.index << std::endl;
-		x += t.radius * 2.;
+	double offX = (w - iw * scale * maxDiameter * gapScale) / 2.;
+	double offY = (h - ih * scale * maxDiameter * gapScale) / 2.;
+
+	for (auto& c : circles) {
+		outFile << (offX + c.cx) << " " << (offY + c.cy) << " " << c.r << " " << c.type << std::endl;
 	}
 
 	outFile.close();
-
-
-	/*std::vector<Circle> circles = std::vector<Circle>();
-	double cx, cy, r;
-	int type;
-	int maxType = 0;
-	while (file >> cx) {
-		file >> cy;
-		file >> r;
-		file >> type;
-
-		circles.emplace_back(Circle{ cx, cy, r, type });
-	}*/
-
-	/*if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		std::cout << "Failed to initialize SDL! Error: " << SDL_GetError() << std::endl;
-		return 3;
-	}
-
-	SDL_Window* window = SDL_CreateWindow("Circles", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, (int)w, (int)h, SDL_WINDOW_SHOWN);
-	if (window == NULL) {
-		std::cout << "Failed to create SDL_Window! Error: " << SDL_GetError() << std::endl;
-		return 4;
-	}
-
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL) {
-		std::cout << "Failed to create SDL_Renderer! Error: " << SDL_GetError() << std::endl;
-		return 5;
-	}
-
-	bool slowly = false;
-
-	int delay = (circles.size() < 4000) ? 1 : 0;
-
-	bool quit = false;
-	while (!quit) {
-		SDL_Event e;
-		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) quit = true;
-			else if (e.type == SDL_KEYDOWN) {
-				if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) quit = true;
-				if (e.key.keysym.scancode == SDL_SCANCODE_SPACE) slowly = true;
-			} else if (e.type == SDL_MOUSEBUTTONDOWN) {
-				int x, y;
-				SDL_GetMouseState(&x, &y);
-				for (auto& c : circles) {
-					double dx = c.cx - x;
-					double dy = c.cy - y;
-					if (dx * dx + dy * dy < c.r * c.r) {
-						std::cout << c.cx << c.cy << c.r << c.type << std::endl;
-					}
-				}
-			}
-		}
-
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
-		SDL_RenderClear(renderer);
-
-		for (unsigned int i = 0; i < circles.size(); i++) {
-			drawCircle(renderer, circles[i]);
-			if (slowly) {
-				SDL_RenderPresent(renderer);
-				SDL_Delay(delay);
-			}
-		}
-		if (slowly) {
-			slowly = false;
-			std::cout << "finished re-rendering" << std::endl;
-		}
-
-		SDL_RenderPresent(renderer);
-	}
-
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();*/
 	
 	return 0;
 }

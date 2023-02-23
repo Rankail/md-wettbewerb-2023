@@ -166,7 +166,7 @@ struct Connection {
 	}
 };
 
-struct PossibleCircle : std::enable_shared_from_this<PossibleCircle> {
+struct PossibleCircle  {
 	std::vector<std::shared_ptr<Connection>> conns;
 	std::shared_ptr<Circle> circle;
 	double maxRadius = 0.;
@@ -176,11 +176,6 @@ struct PossibleCircle : std::enable_shared_from_this<PossibleCircle> {
 
 	static std::shared_ptr<PossibleCircle> create(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns) {
 		return std::make_shared<PossibleCircle>(circle, conns);
-	}
-
-	std::shared_ptr<PossibleCircle> setMaxRadius(double maxRadius) {
-		this->maxRadius = maxRadius;
-		return shared_from_this();
 	}
 };
 
