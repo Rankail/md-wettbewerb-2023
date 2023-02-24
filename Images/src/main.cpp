@@ -115,23 +115,34 @@ struct Circle {
 };
 
 int main(int argc, char** argv) {
-	if (argc != 4 && argc != 1) {
-		std::cout << "Usage: ./Images.exe [IMAGE INPUT OUTPUT]" << std::endl;
+	if (argc != 6 && argc != 1) {
+		std::cout << "Usage: ./Images.exe [IMAGE INPUT OUTPUT] [GAP_SCALE SCALE]" << std::endl;
 		return 1;
 	}
 
 	std::string image, input, output;
-	if (argc == 4) {
+	double gapScale, scale;
+	if (argc == 6) {
 		image = std::string(argv[1]);
 		input = std::string(argv[2]);
 		output = std::string(argv[3]);
+		gapScale = std::atof(argv[4]);
+		scale = std::atof(argv[5]);
 	} else {
-		std::cout << "Image:  ";
+		std::cout << "Image:     ";
 		std::getline(std::cin, image);
-		std::cout << "Input:  ";
+		std::cout << "Input:     ";
 		std::getline(std::cin, input);
-		std::cout << "Output: ";
+		std::cout << "Output:    ";
 		std::getline(std::cin, output);
+
+		std::string line;
+		std::cout << "Gap-Scale: ";
+		std::getline(std::cin, line);
+		gapScale = std::stod(line);
+		std::cout << "Scale: ";
+		std::getline(std::cin, line);
+		scale = std::stod(line);
 	}
 
 	std::ifstream inFile;
@@ -196,6 +207,12 @@ int main(int argc, char** argv) {
 			int32_t diffS = std::abs(c1.s - c2.s);
 			int32_t diffV = std::abs(c1.v - c2.v);
 			int32_t diff = diffH + diffS + diffV;
+			/*RGB c1 = hexToRGB(c);
+			RGB c2 = hexToRGB(circleColors[i]);
+			int32_t diffR = c1.r - c2.r;
+			int32_t diffG = c1.g - c2.g;
+			int32_t diffB = c1.b - c2.b;
+			int32_t diff = diffR * diffR + diffG * diffG + diffB * diffB;*/
 			if (diff < minDiff) {
 				minDiff = diff;
 				idx = i;
@@ -203,25 +220,22 @@ int main(int argc, char** argv) {
 		}
 		colorMap[c] = idx;
 	}
+	int maxType = 0;
+	for (auto const& [k, v] : colorMap) {
+		maxType = std::max(maxType, v);
+	}
 
-	/*colorMap[16777215] = 5;
-	colorMap[16763981] = 5;
-	colorMap[15161968] = 7;
-	colorMap[6702336] = 4;*/
-
-	double maxDiameter = types[7].radius * 2.;
-	double scale = 1.5;
-	double gapScale = 1;
+	double maxDiameter = types[maxType].radius * 2.;
 	std::vector<Circle> circles = std::vector<Circle>();
-	for (double j = 0; j < ih; j += 1. / scale) {
-		for (double i = 0; i < iw; i += 1. / scale) {
-			unsigned char* offset = data + ((int)i + (int)j * iw) * channels;
+	for (int j = 0; j < ih * scale; j++) {
+		for (int i = 0; i < iw * scale; i++) {
+			unsigned char* offset = data + ((int)(i / scale) + (int)(j / scale) * iw) * channels;
 			unsigned char r = offset[0];
 			unsigned char g = offset[1];
 			unsigned char b = offset[2];
 			int32_t color = (r << 16) + (g << 8) + b;
 			if (color == 0xFFFFFF) continue;
-			circles.emplace_back((i + .5) * scale * maxDiameter * gapScale, (ih - j + .5) * scale * maxDiameter * gapScale, types[colorMap[color]].radius, types[colorMap[color]].index);
+			circles.emplace_back((i + .5) * maxDiameter * gapScale, (ih * scale - j + .5) * maxDiameter * gapScale, types[colorMap[color]].radius, types[colorMap[color]].index);
 		}
 	}
 
@@ -232,6 +246,22 @@ int main(int argc, char** argv) {
 	if (!outFile.is_open()) {
 		std::cout << "Failed to open output-file!" << std::endl;
 		return 3;
+	}
+
+	if (iw * scale * maxDiameter * gapScale > w || ih * scale * maxDiameter * gapScale > h) {
+		std::cout << "Image or scale is too big" << std::endl;
+		return 5;
+	}
+
+	for (int i = 0; i < circles.size(); i++) {
+		for (int j = i+1; j < circles.size(); j++) {
+			auto& c1 = circles[i];
+			auto& c2 = circles[j];
+			if ((c1.cx - c2.cx) * (c1.cx - c2.cx) + (c1.cy - c2.cy) * (c1.cy - c2.cy) < (c1.r + c2.r) * (c1.r + c2.r)) {
+				std::cout << "Circle-Collision: " << i << " " << j << std::endl;
+				return 6;
+			}
+		}
 	}
 
 	double offX = (w - iw * scale * maxDiameter * gapScale) / 2.;
