@@ -7,6 +7,9 @@
 struct Circle {
 	double cx, cy, r;
 	int type;
+
+	Circle(double cx, double cy, double r, int type)
+		: cx(cx), cy(cy), r(r), type(type) {}
 };
 
 struct CircleType {
@@ -76,7 +79,7 @@ int main(int argc, char** argv) {
 			} else {
 				types[type].count++;
 			}
-			circles.emplace_back(Circle{cx, h - cy, r, type});
+			circles.emplace_back(cx, cy, r, type);
 			lineNum++;
 		}
 	}
@@ -100,14 +103,7 @@ int main(int argc, char** argv) {
 	std::cout << "D: " << D << std::endl;
 	std::cout << "B: " << A * D << std::endl;
 
-	while (w > 1000. || h > 1000.) {
-		w /= 2.; h /= 2.;
-		for (auto& c : circles) {
-			c.r = std::max(1., c.r/2.);
-			c.cx /= 2.;
-			c.cy /= 2.;
-		}
-	}
+	double maxDiff = 0.;
 
 	int collCount = 0;
 	for (int i = 0; i < circles.size(); i++) {
@@ -129,15 +125,18 @@ int main(int argc, char** argv) {
 			double dx = c2.cx - c1.cx;
 			double dy = c2.cy - c1.cy;
 			double r = c2.r + c1.r;
+			double diff = r - std::sqrt(dx * dx + dy * dy);
+			maxDiff = std::max(maxDiff, diff);
 			if (dx * dx + dy * dy < r * r - 1e-10) {
 				collCount++;
 				std::cout << "Collision: " << "(" << c1.cx << ";" << c1.cy << ";" << c1.r
 					<< ") (" << c2.cx << ";" << c2.cy << ";" << c2.r
-					<< ") difference=" << r - std::sqrt(dx * dx + dy * dy) << std::endl;
+					<< ") difference=" << diff << std::endl;
 			}
 		}
 	}
-	std::cout << "Total collisions: " << collCount << std::endl;
+	std::cout << "Total collisions: " << collCount << std::endl
+		<< "Max Overlap: " << maxDiff << std::endl;
 	
 	return 0;
 }
