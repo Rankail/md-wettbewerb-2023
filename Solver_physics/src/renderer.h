@@ -2,6 +2,7 @@
 
 #ifdef DRAW_SDL
 #include <SDL2/SDL.h>
+#endif
 
 class Renderer {
 public:
@@ -13,8 +14,9 @@ public:
 	static void present();
 
 private:
+#ifdef DRAW_SDL
 	static SDL_Window* window;
 	static SDL_Renderer* renderer;
 	static double scale;
-};
 #endif
+};

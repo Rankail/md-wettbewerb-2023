@@ -169,6 +169,7 @@ int main(int argc, char** argv) {
 	}
 
 	std::sort(types.begin(), types.end(), [](const CircleType& a, const CircleType& b) { return a.radius < b.radius; });
+	//types.erase(types.begin(), types.begin() + 8);
 
 	inFile.close();
 
