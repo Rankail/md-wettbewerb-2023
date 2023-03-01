@@ -19,19 +19,22 @@ def computePoints(id: int, file: str, start: float, end: float, count: int):
     weight = start + part * id
     partEnd = start + part * (id + 1)
     while weight < partEnd:
-        p = subprocess.Popen(["./../inputs/Solver_Release.exe", f"./../inputs/{file}.txt", f"--out=./out/{file}-{weight}.txt", str(weight)], stdout=subprocess.PIPE)
-        output = str(p.communicate()[0]).split("\\r\\n")[-5]
-        if output == None: break
-        m = re.match("Max: (\d*\.\d*) = (\d*\.\d*) \* (\d*\.\d*) .*", output)
-    
-        results.append([weight, *m.groups()])
-        results = list(list(float(n) for n in t) for t in results)
+        try:
+            p = subprocess.Popen(["./../inputs/Solver_Release.exe", f"./../inputs/{file}.txt", f"--out=./out/{file}-{weight}.txt", str(weight)], stdout=subprocess.PIPE)
+            output = str(p.communicate()[0]).split("\\r\\n")
+            if output == None: break
+            m = re.match("Max: (\d*\.\d*) = (\d*\.\d*) \* (\d*\.\d*) .*", output[-5])
+        
+            results.append([weight, *m.groups()])
+            results = list(list(float(n) for n in t) for t in results)
 
-        with cnt.get_lock():
-            cnt.value += 1
-            print(cnt.value, weight, m.group(1))
+            with cnt.get_lock():
+                cnt.value += 1
+                print(cnt.value, weight, m.group(1))
 
-        weight += step
+            weight += step
+        except AttributeError:
+            print(f"Error:\n{file}-{weight}.txt\n{output}")
 
     return results
 
