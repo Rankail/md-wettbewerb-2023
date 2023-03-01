@@ -8,7 +8,10 @@ SDL_Window* Renderer::window = NULL;
 SDL_Renderer* Renderer::renderer = NULL;
 double Renderer::scale = 1.;
 
+#endif
+
 bool Renderer::Init(double w, double h) {
+#ifdef DRAW_SDL
 	scale = 1.;
 	while (w > 1000. || h > 1000.) {
 		w /= 2.; h /= 2; scale != 2.;
@@ -30,20 +33,27 @@ bool Renderer::Init(double w, double h) {
 		std::cout << "Failed to create SDL_Renderer! Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
+#endif
+	return true;
 }
 
 void Renderer::Shutdown() {
+#ifdef DRAW_SDL
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+#endif
 }
 
 void Renderer::clear(double r, double g, double b, double a) {
+#ifdef DRAW_SDL
 	SDL_SetRenderDrawColor(renderer, r, g, b, a);
 	SDL_RenderClear(renderer);
+#endif
 }
 
 void Renderer::drawCircle(double cx, double cy, double r, int type) {
+#ifdef DRAW_SDL
 	int32_t circleColors[8] = {0x000000, 0x9400D3, 0x009E73, 0x56B4E9, 0xE69F00, 0xF0E442, 0x0072B2, 0xE51E10};
 	int color = circleColors[type % 8];
 	SDL_SetRenderDrawColor(renderer, (color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff, 0xff);
@@ -80,10 +90,11 @@ void Renderer::drawCircle(double cx, double cy, double r, int type) {
 			error += tx - diameter;
 		}
 	}
+#endif
 }
 
 void Renderer::present() {
+#ifdef DRAW_SDL
 	SDL_RenderPresent(renderer);
-}
-
 #endif
+}
