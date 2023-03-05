@@ -1,4 +1,4 @@
-## Maxima
+## Maxima (outdated)
 Stand: 17.02.2023
 
 | test-case | B | Gewichtung |

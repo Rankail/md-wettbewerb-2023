@@ -14,7 +14,7 @@ project "Solver"
     }
 
     postbuildcommands {
-        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/inputs/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"',
+        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/inputs/%{cfg.buildtarget.basename}_%{cfg.buildcfg}%{cfg.buildtarget.extension}"',
     }
 
     filter {"configurations:SDL_*", "system:windows"}
