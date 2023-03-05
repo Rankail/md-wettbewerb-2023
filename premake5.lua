@@ -16,7 +16,6 @@ workspace "md_2023"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "Solver"
-include "Solver_deep"
 include "Solver_ar"
 include "Display"
 include "Scramble"

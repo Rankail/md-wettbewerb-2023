@@ -14,7 +14,7 @@ project "Scramble"
     }
 
     postbuildcommands {
-        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/results/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"',
+        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/results/%{cfg.buildtarget.basename}_%{cfg.buildcfg}%{cfg.buildtarget.extension}"',
     }
 
     filter "configurations:*Debug"

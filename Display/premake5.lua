@@ -14,7 +14,7 @@ project "Display"
     }
 
     postbuildcommands {
-        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/results/%{cfg.buildtarget.basename}_%{cfg.buildcfg}.exe"',
+        '{COPYFILE} "%{cfg.buildtarget.relpath}" "%{wks.location}/results/%{cfg.buildtarget.basename}_%{cfg.buildcfg}%{cfg.buildtarget.extension}"',
         '{COPYFILE} "%{wks.location}dependencies/SDL2/lib/*.dll" "%{wks.location}/results/"'
     }
 
