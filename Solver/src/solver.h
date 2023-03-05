@@ -8,14 +8,14 @@ public:
 	Solver();
 	virtual ~Solver();
 
-	bool init(const std::string& inputfile, double weighting);
+	bool init(const std::string& inputfile);
 
 	void reset();
 
 	bool readInput(const std::string& path);
 	bool writeOutput(Result& result, const std::string& outputfile);
 
-	Result run();
+	Result run(double weighting, unsigned seed);
 
 	void stepWeights();
 

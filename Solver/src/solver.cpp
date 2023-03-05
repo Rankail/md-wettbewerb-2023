@@ -40,17 +40,10 @@ Solver::~Solver() {
 /*
 * Initializes Solver with Data from the specified inputfile
 */
-bool Solver::init(const std::string& inputfile, double weighting)
+bool Solver::init(const std::string& inputfile)
 {
 	loaded = readInput(inputfile);
 	if (!loaded) return false;
-
-	if (weighting > 2. || 0 > weighting) {
-		std::cout << "Weightening must be between 0 and 2" << std::endl;
-		loaded = false;
-		return false;
-	}
-	this->weighting = weighting;
 
 #ifdef DRAW_SDL
 	if (w > 1000 || h > 1000) {
@@ -164,7 +157,15 @@ bool Solver::writeOutput(Result& result, const std::string& outputfile) {
 /*
 * runs the algorithm
 */
-Result Solver::run() {
+Result Solver::run(double weighting, unsigned seed) {
+	if (weighting > 2. || 0 > weighting) {
+		std::cout << "Weightening must be between 0 and 2" << std::endl;
+		loaded = false;
+		return Result();
+	}
+	this->weighting = weighting;
+
+	std::srand(seed);
 
 	if (!loaded) {
 		std::cout << "Could not run because the last Initialization failed" << std::endl;
@@ -191,6 +192,7 @@ Result Solver::run() {
 			std::shared_ptr<PossibleCircle> pc = getNextCircle(type);
 			if (pc == nullptr) continue;
 			std::shared_ptr<Circle> circle = pc->circle;
+			circle->index = std::rand();
 
 			updateConnections(circle);
 
@@ -522,7 +524,6 @@ std::shared_ptr<PossibleCircle> Solver::getCirclFromCorner(Corner corner, double
 		conns.push_back(Connection::create(c, Wall::DOWN, true));
 		conns.push_back(Connection::create(c, Wall::DOWN, false));
 	}
-	c->index = iteration;
 	return PossibleCircle::create(c, conns);
 }
 
@@ -541,7 +542,6 @@ std::shared_ptr<PossibleCircle> Solver::getCircleFromWall(std::shared_ptr<Connec
 	} else if (conn->wall == Wall::RIGHT) {
 		c = Circle::create(w - r, conn->c1->cy - wd, r);
 	}
-	c->index = iteration;
 	std::vector<std::shared_ptr<Connection>> conns = std::vector<std::shared_ptr<Connection>>();
 	conns.emplace_back(Connection::create(c, conn->c1, true));
 	conns.emplace_back(Connection::create(c, conn->c1, false));
@@ -557,7 +557,6 @@ std::shared_ptr<PossibleCircle> Solver::getCircleFromCircle(std::shared_ptr<Circ
 	std::shared_ptr<Circle> n;
 	if (left) n = circleFromTwoCircles(c1, c2, r);
 	else n = circleFromTwoCircles(c2, c1, r);
-	n->index = iteration;
 	std::vector<std::shared_ptr<Connection>> conns = std::vector<std::shared_ptr<Connection>>();
 	conns.emplace_back(Connection::create(n, c1, true));
 	conns.emplace_back(Connection::create(n, c1, false));

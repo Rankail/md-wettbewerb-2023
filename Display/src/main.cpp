@@ -168,7 +168,7 @@ int main(int argc, char** argv) {
 					double dx = c.cx - x;
 					double dy = c.cy - y;
 					if (dx * dx + dy * dy < c.r * c.r) {
-						std::cout << c.cx << c.cy << c.r << c.type << std::endl;
+						std::cout << c.cx << " " << (h - c.cy) << " " << c.r << " " << c.type << std::endl;
 					}
 				}
 			}

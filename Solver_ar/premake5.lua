@@ -1,4 +1,4 @@
-project "Solver_weight"  
+project "Solver_ar"  
     kind "ConsoleApp" 
     language "C++"
     cppdialect "C++17"
