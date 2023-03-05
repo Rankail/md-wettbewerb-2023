@@ -26,11 +26,13 @@ $ make 04 config=release
 The executables can be found in `bin` and are copied to `inputs` or `results` after building
 
 ```
-./Solver.exe [INPUTFILE RADIUS_EXPONENT COUNT_EXPONENT] [--out=OUTPUTFILE]
+./Solver_Release.exe [INPUTFILE WEIGHTING SEED] [--out=OUTPUTFILE]
 ```
 Weighting:\
 0-1 => constant to linear\
 1-2 => linear to quadratic
+Seed:\
+0-4294967295
 
 ### Render outputfile:
 ```

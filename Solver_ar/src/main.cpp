@@ -5,7 +5,7 @@
 int main(int argc, char** argv) {
 	std::string input;
 	std::string output;
-	Weighting weighting = Weighting();
+	double weighting;
 
 	std::vector<std::string> args = std::vector<std::string>();
 	for (int i = 0; i < argc; i++) {
@@ -19,35 +19,27 @@ int main(int argc, char** argv) {
 	}
 	
 	// Process Command line arguments
-	if (args.size() != 1 && args.size() != 4) {
-		std::cout << "Usage: ./Solver.exe [INPUTFILE RADIUS_EXPONENT COUNT_EXPONENT]\n\t\t[--out=OUTPUTFILE]" << std::endl;
+	if (args.size() != 1 && args.size() != 3) {
+		std::cout << "Usage: ./Solver.exe [INPUTFILE WEIGHTING] [--out=OUTPUTFILE]" << std::endl;
 		return 1;
 	}
 	if (args.size() == 1) {
-		std::cout << "Inputfile:       ";
+		std::cout << "Inputfile:  ";
 		std::getline(std::cin, input);
-
+		std::cout << "Weighting:  ";
 		std::string weighting_str;
-		std::cout << "Radius-Exponent: ";
 		std::getline(std::cin, weighting_str);
-		weighting.radiusExponent = weighting_str.empty() ? 0. : std::stod(weighting_str);
-
-		std::cout << "Count-Exponent:  ";
-		std::getline(std::cin, weighting_str);
-		weighting.countExponent = weighting_str.empty() ? 0. : std::stod(weighting_str);
-
+		weighting = weighting_str.empty() ? weighting = 0. : std::stod(weighting_str);
 		if (output.empty()) {
-			std::cout << "Outputfile:      ";
+			std::cout << "Outputfile: ";
 			std::getline(std::cin, output);
 		}
 	} else {
 		input = std::string(args[1]);
-		weighting.radiusExponent = std::stoi(args[2]);
-		weighting.countExponent = std::stoi(args[3]);
+		weighting = std::stod(args[2]);
 	}
 
 	auto startTime = std::chrono::high_resolution_clock::now();
-
 
 	Solver s = Solver();
 	if (!s.init(input, weighting)) {

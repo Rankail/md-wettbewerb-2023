@@ -6,6 +6,7 @@ int main(int argc, char** argv) {
 	std::string input;
 	std::string output;
 	double weighting;
+	unsigned seed;
 
 	std::vector<std::string> args = std::vector<std::string>();
 	for (int i = 0; i < argc; i++) {
@@ -19,8 +20,8 @@ int main(int argc, char** argv) {
 	}
 	
 	// Process Command line arguments
-	if (args.size() != 1 && args.size() != 3) {
-		std::cout << "Usage: ./Solver.exe [INPUTFILE WEIGHTING] [--out=OUTPUTFILE]" << std::endl;
+	if (args.size() != 1 && args.size() != 4) {
+		std::cout << "Usage: ./Solver.exe [INPUTFILE WEIGHTING SEED] [--out=OUTPUTFILE]" << std::endl;
 		return 1;
 	}
 	if (args.size() == 1) {
@@ -30,6 +31,10 @@ int main(int argc, char** argv) {
 		std::string weighting_str;
 		std::getline(std::cin, weighting_str);
 		weighting = weighting_str.empty() ? weighting = 0. : std::stod(weighting_str);
+		std::cout << "Seed:       ";
+		std::string seed_str;
+		std::getline(std::cin, seed_str);
+		seed = seed_str.empty() ? 0 : std::stoul(seed_str);
 		if (output.empty()) {
 			std::cout << "Outputfile: ";
 			std::getline(std::cin, output);
@@ -37,17 +42,18 @@ int main(int argc, char** argv) {
 	} else {
 		input = std::string(args[1]);
 		weighting = std::stod(args[2]);
+		seed = std::stoul(args[3]);
 	}
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 
 	Solver s = Solver();
-	if (!s.init(input, weighting)) {
+	if (!s.init(input)) {
 		std::cout << "Failed to initialize Solver!" << std::endl;
 		return 2;
 	}
 
-	auto result = s.run();
+	auto result = s.run(weighting, seed);
 	if (result.circleCountAtMax == -1) {
 		std::cout << "An Error occurred during computation!" << std::endl;
 		return 3;

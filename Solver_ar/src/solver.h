@@ -15,8 +15,7 @@ public:
 	bool readInput(const std::string& path);
 	bool writeOutput(Result& result, const std::string& outputfile);
 
-	Result runPlace();
-	void runPhysics();
+	Result run();
 
 	void stepWeights();
 
@@ -26,14 +25,16 @@ public:
 
 	bool checkValid(double cx, double cy, double r);
 
-	void calcMaxRadiusConnectionCorner(std::shared_ptr<Connection> conn);
-	void calcMaxRadiusConnectionWall(std::shared_ptr<Connection> conn);
-	void calcMaxRadiusConnectionCircle(std::shared_ptr<Connection> conn);
+	void testRadiiOfConnection(std::shared_ptr<Connection>& conn);
 
-	std::shared_ptr<PossibleCircle> getCircleFromConnection(std::shared_ptr<Connection> conn, double r);
+	void testRadiiOfConnectionCorner(std::shared_ptr<Connection>& conn);
+	void testRadiiOfConnectionWall(std::shared_ptr<Connection>& conn);
+	void testRadiiOfConnectionCircle(std::shared_ptr<Connection>& conn);
+
+	std::shared_ptr<PossibleCircle> getCircleFromConnection(std::shared_ptr<Connection>& conn, double r);
 	std::shared_ptr<PossibleCircle> getCirclFromCorner(Corner corner, double r);
-	std::shared_ptr<PossibleCircle> getCircleFromWall(std::shared_ptr<Connection> conn, double r);
-	std::shared_ptr<PossibleCircle> getCircleFromCircle(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r, bool left);
+	std::shared_ptr<PossibleCircle> getCircleFromWall(std::shared_ptr<Connection>& conn, double r);
+	std::shared_ptr<PossibleCircle> getCircleFromCircle(std::shared_ptr<Circle>& c1, std::shared_ptr<Circle>& c2, double r, bool left);
 
 	void render();
 
@@ -43,8 +44,8 @@ private:
 	std::vector<CircleType> types;
 
 	std::vector<std::shared_ptr<Circle>> circles;
-	std::vector<std::shared_ptr<Connection>> conns_calculated;
 	std::vector<std::shared_ptr<Connection>> conns_unknown;
+	std::vector<std::shared_ptr<Connection>> conns_calculated;
 
 	std::unordered_map<double, int> radiusMap;
 	std::vector<double> radii;

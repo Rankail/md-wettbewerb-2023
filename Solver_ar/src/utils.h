@@ -18,20 +18,15 @@
 
 struct Connection;
 
-struct Weighting {
-	double radiusExponent;
-	double countExponent;
-};
-
 struct CircleType {
 	int index;
 	double r;
-	double radiusPercent;
+	double sizeMultiplier;
 	int count;
 	double weight;
 
 	CircleType(int index, double r)
-		: index(index), r(r), radiusPercent(0.), count(0), weight(0.) {
+		: index(index), r(r), sizeMultiplier(0.), count(0), weight(0.) {
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const CircleType& ct) {
@@ -72,7 +67,7 @@ struct Circle {
 	int index;
 	int typeIndex;
 	double cx, cy, r;
-	Circle(double cx, double cy, double r) : cx(cx), cy(cy), r(r), index(0), typeIndex(0) {}
+	Circle(double cx, double cy, double r) : cx(cx), cy(cy), r(r) {}
 
 	static std::shared_ptr<Circle> create(double cx, double cy, double r) {
 		return std::make_shared<Circle>(cx, cy, r);
@@ -98,7 +93,7 @@ struct Connection {
 		Wall wall = Wall::LEFT;
 		Corner corner;
 	};
-	double maxRadius = 0;
+	std::vector<double> radii;
 	bool left = true;
 
 	Connection(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, bool left)
@@ -141,7 +136,7 @@ struct Connection {
 			else if (c.corner == Corner::BL) os << "BL";
 			else if (c.corner == Corner::BR) os << "BR";
 		}
-		os << " mr=" << c.maxRadius;
+		os << " mr=" << c.radii[0];
 		os << " left=" << c.left;
 		os << ">";
 		return os;
@@ -164,14 +159,14 @@ struct Connection {
 			else if (c->corner == Corner::BL) os << "BL";
 			else if (c->corner == Corner::BR) os << "BR";
 		}
-		os << " mr=" << c->maxRadius;
+		os << " mr=" << c->radii[0];
 		os << " left=" << c->left;
 		os << ">";
 		return os;
 	}
 };
 
-struct PossibleCircle : std::enable_shared_from_this<PossibleCircle> {
+struct PossibleCircle  {
 	std::vector<std::shared_ptr<Connection>> conns;
 	std::shared_ptr<Circle> circle;
 	double maxRadius = 0.;
@@ -181,11 +176,6 @@ struct PossibleCircle : std::enable_shared_from_this<PossibleCircle> {
 
 	static std::shared_ptr<PossibleCircle> create(std::shared_ptr<Circle> circle, std::vector<std::shared_ptr<Connection>> conns) {
 		return std::make_shared<PossibleCircle>(circle, conns);
-	}
-
-	std::shared_ptr<PossibleCircle> setMaxRadius(double maxRadius) {
-		this->maxRadius = maxRadius;
-		return shared_from_this();
 	}
 };
 
