@@ -18,7 +18,7 @@ If you are using Ubuntu or Debian install `libsdl2-dev`\
 For other linux-distributions you can look [here](https://lazyfoo.net/tutorials/SDL/01_hello_SDL/linux/index.php)
 ```
 $ premake5 gmake2
-$ make 04 config=release
+$ make Solver config=release
 ```
 
 ## Execute
@@ -30,7 +30,7 @@ The executables can be found in `bin` and are copied to `inputs` or `results` af
 ```
 Weighting:\
 0-1 => constant to linear\
-1-2 => linear to quadratic
+1-2 => linear to quadratic\
 Seed:\
 0-4294967295
 
@@ -47,3 +47,9 @@ Press space to show animation of circles appearing in order
 Sort by:\
 [1] Random\
 [2] Distance from center
+
+### Images:
+```
+./Images_Release.exe [IMAGE INPUT OUTPUT GAP_SCALE SCALE]
+```
+GAP_SCALE: scale of gap between pixels; relative to biggest color circle

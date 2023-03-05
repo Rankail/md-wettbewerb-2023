@@ -116,7 +116,7 @@ struct Circle {
 
 int main(int argc, char** argv) {
 	if (argc != 6 && argc != 1) {
-		std::cout << "Usage: ./Images.exe [IMAGE INPUT OUTPUT] [GAP_SCALE SCALE]" << std::endl;
+		std::cout << "Usage: ./Images.exe [IMAGE INPUT OUTPUT GAP_SCALE SCALE]" << std::endl;
 		return 1;
 	}
 
@@ -169,7 +169,7 @@ int main(int argc, char** argv) {
 	}
 
 	std::sort(types.begin(), types.end(), [](const CircleType& a, const CircleType& b) { return a.radius < b.radius; });
-	//types.erase(types.begin(), types.begin() + 8);
+	//types.erase(types.begin(), types.begin() + 8); // increase circle size -> less circles for same fill
 
 	inFile.close();
 
