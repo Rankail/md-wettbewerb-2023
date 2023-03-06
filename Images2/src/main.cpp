@@ -8,6 +8,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <iomanip>
 
 struct RGB {
 	unsigned char r;
@@ -265,7 +266,7 @@ int main(int argc, char** argv) {
 	}
 	
 	for (auto& c : circles) {
-		noutFile << c.cx << " " << c.cy << " " << c.r << " " << c.type << std::endl;
+		noutFile << std::setprecision(std::numeric_limits<long double>::digits10) << c.cx << " " << std::setprecision(std::numeric_limits<long double>::digits10) << c.cy << " " << c.r << " " << c.type << std::endl;
 	}
 
 	int counts[100] = { 0 };
