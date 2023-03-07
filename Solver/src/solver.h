@@ -37,7 +37,6 @@ public:
 	void render();
 
 private:
-	std::string name;
 	double w, h;
 	std::vector<CircleType> types;
 
@@ -50,10 +49,6 @@ private:
 
 	int circleCountAtMax = 0;
 	double weighting;
-
-	double numBlocks;
-
-	int iteration;
 
 	bool loaded;
 

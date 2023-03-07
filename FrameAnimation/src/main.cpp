@@ -1,7 +1,6 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include <unordered_map>
 #include <iostream>
 #include <algorithm>
 
@@ -19,6 +18,9 @@ struct Circle {
 
 double w, h;
 
+/*
+* Sorts circles based on frame. Black pixel -> show circle
+*/
 std::vector<Circle>::iterator sortForFrame(const std::string& frame, std::vector<Circle>::iterator start, std::vector<Circle>::iterator end) {
 	int iw, ih, channels;
 	unsigned char* image = stbi_load(frame.c_str(), &iw, &ih, &channels, 0);
@@ -28,8 +30,8 @@ std::vector<Circle>::iterator sortForFrame(const std::string& frame, std::vector
 	}
 
 	auto partition = std::stable_partition(start, end, [&](const Circle& c) {
-		int x = c.cx * iw / w;
-		int y = ih - c.cy * ih / h;
+		int x = (int)(c.cx * iw / w);
+		int y = (int)(ih - c.cy * ih / h);
 		unsigned char* offset = image + (x + y * iw) * channels;
 		unsigned char r = offset[0];
 		unsigned char g = offset[1];
@@ -74,7 +76,7 @@ int main(int argc, char** argv) {
 		std::cout << "Frames:     ";
 		std::getline(std::cin, line);
 		size_t space = line.find(' ');
-		int lastSpace = 0;
+		size_t lastSpace = 0;
 		while (space != std::string::npos) {
 			frames.emplace_back(line.substr(lastSpace, space - lastSpace));
 			lastSpace = space;
@@ -104,6 +106,7 @@ int main(int argc, char** argv) {
 
 	ooutFile.close();
 
+	// animation from center 
 	std::sort(circles.begin(), circles.end(), [](const Circle& a, const Circle& b) {
 		double adx = w / 2 - a.cx;
 		double ady = h / 2 - a.cy;
@@ -118,6 +121,7 @@ int main(int argc, char** argv) {
 		std::cout << std::distance(circles.begin(), it) << std::endl;
 	}
 
+	// animate rest of circles
 	std::sort(it, circles.end(), [](const Circle& a, const Circle& b) {
 		double adx = w / 2 - a.cx;
 		double ady = h / 2 - a.cy;

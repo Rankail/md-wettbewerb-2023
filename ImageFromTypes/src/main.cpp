@@ -1,7 +1,6 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include <unordered_map>
 #include <iostream>
 #include <algorithm>
 #include <iomanip>
@@ -22,7 +21,7 @@ struct HSV {
 };
 
 RGB hexToRGB(int32_t hex) {
-	RGB out;
+	RGB out = RGB();
 	out.r = (hex >> 16) & 0xff;
 	out.g = (hex >> 8) & 0xff;
 	out.b = hex & 0xff;
@@ -30,7 +29,7 @@ RGB hexToRGB(int32_t hex) {
 }
 
 HSV rgbToHsv(RGB rgb) {
-	HSV hsv;
+	HSV hsv = HSV();
 	unsigned char rgbMin, rgbMax;
 
 	rgbMin = rgb.r < rgb.g ? (rgb.r < rgb.b ? rgb.r : rgb.b) : (rgb.g < rgb.b ? rgb.g : rgb.b);
@@ -59,11 +58,6 @@ HSV rgbToHsv(RGB rgb) {
 	return hsv;
 }
 
-struct CircleType {
-	int index;
-	double radius;
-};
-
 struct Circle {
 	double cx, cy, r;
 	int type;
@@ -76,6 +70,9 @@ unsigned char* image_data;
 int iw, ih, channels;
 double w, h;
 
+/*
+* only works with circles of equal radius
+*/
 std::vector<Circle> drawImage(std::vector<Circle> circles, double left, double right, double scale) {
 	int32_t circleColors[8] = { 0x000000, 0x9400D3, 0x009E73, 0x56B4E9, 0xE69F00, 0xF0E442, 0x0072B2, 0xE51E10 };
 	int32_t colorCounts[8] = { 0 };
@@ -90,8 +87,8 @@ std::vector<Circle> drawImage(std::vector<Circle> circles, double left, double r
 			fillers.push_back(&c);
 			continue;
 		}
-		int x = (c.cx - offX) / scale * iw / w;
-		int y = ih-(c.cy - offY) / scale * ih / h;
+		int x = (int)((c.cx - offX) / scale * iw / w);
+		int y = (int)(ih-(c.cy - offY) / scale * ih / h);
 		unsigned char* offset = image_data + (x + y * iw) * channels;
 		unsigned char r = offset[0];
 		unsigned char g = offset[1];
@@ -124,6 +121,7 @@ std::vector<Circle> drawImage(std::vector<Circle> circles, double left, double r
 			colorIndices[idx]++;
 			colorCounts[idx] = 0;
 		}
+		//binary search for biggest image possible with circles
 		if (colorIndices[idx]*8+idx > 100) {
 			//too many 
 			return drawImage(circles, left, scale, left + (scale - left) / 2.);
@@ -135,6 +133,7 @@ std::vector<Circle> drawImage(std::vector<Circle> circles, double left, double r
 		return drawImage(circles, scale, right, scale + (scale - left) / 2.);
 	}
 
+	// use rest of circles
 	int fi = 0;
 	for (int i = 0; i < 8; i++) {
 		while (colorIndices[i] * 8 + i < 100 && fi < fillers.size()) {
@@ -223,7 +222,8 @@ int main(int argc, char** argv) {
 	}
 	
 	for (auto& c : circles) {
-		noutFile << std::setprecision(std::numeric_limits<long double>::digits10) << c.cx << " " << std::setprecision(std::numeric_limits<long double>::digits10) << c.cy << " " << c.r << " " << c.type << std::endl;
+		noutFile << std::setprecision(std::numeric_limits<long double>::digits10) << c.cx
+			<< " " << std::setprecision(std::numeric_limits<long double>::digits10) << c.cy << " " << c.r << " " << c.type << std::endl;
 	}
 
 	int counts[100] = { 0 };

@@ -47,25 +47,27 @@ int main(int argc, char** argv) {
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 
+	// initialize
 	Solver s = Solver();
 	if (!s.init(input)) {
 		std::cout << "Failed to initialize Solver!" << std::endl;
 		return 2;
 	}
 
+	// run
 	auto result = s.run(weighting, seed);
 	if (result.circleCountAtMax == -1) {
 		std::cout << "An Error occurred during computation!" << std::endl;
 		return 3;
 	}
 
+	// write result to output-file
 	if (!output.empty()) {
 		if (!s.writeOutput(result, output)) {
 			std::cout << "Failed to save output!" << std::endl;
 			return 4;
 		}
 	}
-
 
 	auto endTime = std::chrono::high_resolution_clock::now();
 

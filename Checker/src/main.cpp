@@ -1,8 +1,9 @@
-#include <SDL2/SDL.h>
 #include <string>
 #include <fstream>
 #include <vector>
 #include <iostream>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 struct Circle {
 	double cx, cy, r;
@@ -46,7 +47,7 @@ int main(int argc, char** argv) {
 	std::string line;
 	std::getline(inFile, line);
 	std::getline(inFile, line);
-	int space = line.find(' ');
+	size_t space = line.find(' ');
 	double w = std::stod(line.substr(0, space));
 	double h = std::stod(line.substr(space));
 	auto types = std::vector<CircleType>();
@@ -64,6 +65,7 @@ int main(int argc, char** argv) {
 		std::cout << "Failed to open output-file!" << std::endl;
 		return 2;
 	}
+	
 	std::vector<Circle> circles = std::vector<Circle>();
 	{
 		double cx, cy, r;

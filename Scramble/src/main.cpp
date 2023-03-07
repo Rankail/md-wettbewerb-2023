@@ -20,9 +20,9 @@ void sortCenterDistance(std::vector<std::string>& lines, double w, double h) {
 	std::vector<Circle> distances = std::vector<Circle>();
 	double maxX = 0., maxY = 0.;
 	for (auto& line : lines) {
-		int s1 = line.find(' ');
-		int s2 = line.find(' ', s1 + 1);
-		int s3 = line.find(' ', s2 + 1);
+		size_t s1 = line.find(' ');
+		size_t s2 = line.find(' ', s1 + 1);
+		size_t s3 = line.find(' ', s2 + 1);
 		double cx = std::stod(line.substr(0, s1));
 		double cy = std::stod(line.substr(s1, s2));
 		double r = std::stod(line.substr(s2, s3));

@@ -10,7 +10,7 @@ struct Circle {
 };
 
 static void drawCircle(SDL_Renderer* renderer, Circle& c) {
-	int32_t circleColors[8] = {0x000000, 0x9400D3, 0x009E73, 0x56B4E9, 0xE69F00, 0xF0E442, 0x0072B2, 0xE51E10};
+	int32_t circleColors[8] = {0x000000, 0x9400D3, 0x009E73, 0x56B4E9, 0xE69F00, 0xF0E442, 0x0072B2, 0xE51E10}; //colros from website
 	int color = circleColors[c.type % 8];
 	uint8_t r = (color >> 16) & 0xff;
 	uint8_t g = (color >> 8) & 0xff;
@@ -123,7 +123,8 @@ int main(int argc, char** argv) {
 	std::cout << "D: " << D << std::endl;
 	std::cout << "B: " << A * D << std::endl;
 
-	while (w > 1000. || h > 1000.) {
+	// scale down
+	while (w > 900. || h > 900.) {
 		w /= 2.; h /= 2.;
 		for (auto& c : circles) {
 			c.r = std::max(1., c.r/2.);

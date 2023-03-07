@@ -1,4 +1,3 @@
-//#include <SDL2/SDL.h>
 #include <string>
 #include <fstream>
 #include <vector>
@@ -182,6 +181,7 @@ int main(int argc, char** argv) {
 
 	int32_t circleColors[8] = {0x000000, 0x9400D3, 0x009E73, 0x56B4E9, 0xE69F00, 0xF0E442, 0x0072B2, 0xE51E10};
 
+	// gets all colors present of image
 	std::vector<int32_t> colors = std::vector<int32_t>();
 	for (int j = 0; j < ih; j++) {
 		for (int i = 0; i < iw; i++) {
@@ -197,6 +197,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	// creates map for most similiar color based on distance in hsv
 	std::unordered_map<int32_t, int32_t> colorMap = std::unordered_map<int32_t, int32_t>();
 	for (auto& c : colors) {
 		int minDiff = 255 * 3 + 1;
@@ -208,12 +209,6 @@ int main(int argc, char** argv) {
 			int32_t diffS = std::abs(c1.s - c2.s);
 			int32_t diffV = std::abs(c1.v - c2.v);
 			int32_t diff = diffH + diffS + diffV;
-			/*RGB c1 = hexToRGB(c);
-			RGB c2 = hexToRGB(circleColors[i]);
-			int32_t diffR = c1.r - c2.r;
-			int32_t diffG = c1.g - c2.g;
-			int32_t diffB = c1.b - c2.b;
-			int32_t diff = diffR * diffR + diffG * diffG + diffB * diffB;*/
 			if (diff < minDiff) {
 				minDiff = diff;
 				idx = i;
@@ -226,6 +221,7 @@ int main(int argc, char** argv) {
 		maxType = std::max(maxType, v);
 	}
 
+	//places circles
 	double maxDiameter = types[maxType].radius * 2.;
 	std::vector<Circle> circles = std::vector<Circle>();
 	for (int j = 0; j < ih * scale; j++) {

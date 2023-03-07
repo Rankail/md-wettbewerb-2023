@@ -203,6 +203,7 @@ static Point intersectionTwoCircles(double cx1, double cy1, double cr1, double c
 	return Point{x3, y3};
 }
 
+// Construct circle touching two circles
 static std::shared_ptr<Circle> circleFromTwoCircles(std::shared_ptr<Circle> c1, std::shared_ptr<Circle> c2, double r) {
 	auto p = intersectionTwoCircles(c1->cx, c1->cy, c1->r + r, c2->cx, c2->cy, c2->r + r);
 	return Circle::create(p.x, p.y, r);

@@ -58,7 +58,7 @@ Places Circles to make image
 GAP_SCALE: scale of gap between pixels; relative to biggest color circle
 
 ### ImageFromTypes
-Sets types of circles to make picture (only works with equal radii)
+Sets types of circles to make picture; **only works with equal radii!**
 ```
 ./ImageFromTypes [IMAGE OLD_OUTPUT W H NEW_OUTPUT]
 ```
