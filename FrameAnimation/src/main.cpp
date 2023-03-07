@@ -43,7 +43,7 @@ std::vector<Circle>::iterator sortForFrame(const std::string& frame, std::vector
 
 int main(int argc, char** argv) {
 	if (argc >= 2 && argc <= 4) {
-		std::cout << "Usage: ./Images3.exe [OLD_OUTPUT W H NEW_OUTPUT FRAMES...]" << std::endl;
+		std::cout << "Usage: ./FrameAnimation [OLD_OUTPUT W H NEW_OUTPUT FRAMES...]" << std::endl;
 		return 1;
 	}
 

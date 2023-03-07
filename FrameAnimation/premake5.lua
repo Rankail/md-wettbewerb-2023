@@ -1,4 +1,4 @@
-project "Images3"  
+project "FrameAnimation"  
     kind "ConsoleApp" 
     language "C++"
     cppdialect "C++20"

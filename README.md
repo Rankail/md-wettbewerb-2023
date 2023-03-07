@@ -1,4 +1,4 @@
-# Mathe-Dual Wettbewerb 2023
+# Mathe-Dual Wettbewerb 2023 (Team PI)
 
 ## Setup
 You need [premake](https://premake.github.io/)\
@@ -25,31 +25,47 @@ $ make Solver config=release
 
 The executables can be found in `bin` and are copied to `inputs` or `results` after building
 
+### Solver
 ```
-./Solver_Release.exe [INPUTFILE WEIGHTING SEED] [--out=OUTPUTFILE]
+./Solver [INPUTFILE WEIGHTING SEED] [--out=OUTPUTFILE]
 ```
-Weighting:\
+Weighting (of radii):\
 0-1 => constant to linear\
 1-2 => linear to quadratic\
 Seed:\
 0-4294967295
 
-### Render outputfile:
+### Display:
+Render output
 ```
-./Display_Release.exe [FILE]
+./Display [FILE]
 ```
 Press space to show animation of circles appearing in order
 
 ### Scrambler:
 ```
-./Scramble_Release.exe [FILE SCRAMBLE_TYPE]
+./Scramble [FILE SCRAMBLE_TYPE]
 ```
 Sort by:\
 [1] Random\
 [2] Distance from center
 
-### Images:
+### ImageFromCircles:
+Places Circles to make image
 ```
-./Images_Release.exe [IMAGE INPUT OUTPUT GAP_SCALE SCALE]
+./ImageFromCircles [IMAGE INPUT OUTPUT GAP_SCALE SCALE]
 ```
 GAP_SCALE: scale of gap between pixels; relative to biggest color circle
+
+### ImageFromTypes
+Sets types of circles to make picture (only works with equal radii)
+```
+./ImageFromTypes [IMAGE OLD_OUTPUT W H NEW_OUTPUT]
+```
+
+### FrameAnimation
+Sets order of circles according to key-frames\
+-> shows circles mapped on black pixels of frame
+```
+./FrameAnimation [OLD_OUTPUT W H NEW_OUTPUT FRAMES...]
+```

@@ -1,14 +1,13 @@
-//#include <SDL2/SDL.h>
 #include <string>
 #include <fstream>
 #include <vector>
 #include <unordered_map>
 #include <iostream>
 #include <algorithm>
+#include <iomanip>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#include <iomanip>
 
 struct RGB {
 	unsigned char r;
@@ -28,48 +27,6 @@ RGB hexToRGB(int32_t hex) {
 	out.g = (hex >> 8) & 0xff;
 	out.b = hex & 0xff;
 	return out;
-}
-
-RGB hsvToRgb(HSV hsv) {
-	RGB rgb;
-	unsigned char region, remainder, p, q, t;
-
-	if (hsv.s == 0) {
-		rgb.r = hsv.v;
-		rgb.g = hsv.v;
-		rgb.b = hsv.v;
-		return rgb;
-	}
-
-	region = hsv.h / 43;
-	remainder = (hsv.h - (region * 43)) * 6;
-
-	p = (hsv.v * (255 - hsv.s)) >> 8;
-	q = (hsv.v * (255 - ((hsv.s * remainder) >> 8))) >> 8;
-	t = (hsv.v * (255 - ((hsv.s * (255 - remainder)) >> 8))) >> 8;
-
-	switch (region) {
-		case 0:
-			rgb.r = hsv.v; rgb.g = t; rgb.b = p;
-			break;
-		case 1:
-			rgb.r = q; rgb.g = hsv.v; rgb.b = p;
-			break;
-		case 2:
-			rgb.r = p; rgb.g = hsv.v; rgb.b = t;
-			break;
-		case 3:
-			rgb.r = p; rgb.g = q; rgb.b = hsv.v;
-			break;
-		case 4:
-			rgb.r = t; rgb.g = p; rgb.b = hsv.v;
-			break;
-		default:
-			rgb.r = hsv.v; rgb.g = p; rgb.b = q;
-			break;
-	}
-
-	return rgb;
 }
 
 HSV rgbToHsv(RGB rgb) {
@@ -195,7 +152,7 @@ std::vector<Circle> drawImage(std::vector<Circle> circles, double left, double r
 
 int main(int argc, char** argv) {
 	if (argc != 6 && argc != 1) {
-		std::cout << "Usage: ./Images.exe [IMAGE OLD_OUTPUT W H NEW_OUTPUT]" << std::endl;
+		std::cout << "Usage: ./ImageFromTypes [IMAGE OLD_OUTPUT W H NEW_OUTPUT]" << std::endl;
 		return 1;
 	}
 

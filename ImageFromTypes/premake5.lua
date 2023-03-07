@@ -1,4 +1,4 @@
-project "Images2"  
+project "ImageFromTypes"  
     kind "ConsoleApp" 
     language "C++"
     cppdialect "C++20"

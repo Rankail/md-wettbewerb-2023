@@ -1,4 +1,4 @@
-project "Images"  
+project "ImageFromCircles"  
     kind "ConsoleApp" 
     language "C++"
     cppdialect "C++20"
