@@ -1,4 +1,4 @@
-# Mathe-Dual Wettbewerb 2023 (Team PI)
+# Mathe-Dual Wettbewerb 2023 (Team PI) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Task
 You are given the size of a rectangular area and a list of circle-types that aren't necessarily unique.\
@@ -42,12 +42,13 @@ The solver keeps track of the maximum score of the placed circles. If the maximu
 - Calculate a score instead of sorting by one attribute after another.
 - Genetic algorithms would probably not lead to any great results because you can never say how it is going to play out in the end and even a little change can make big differences.
 
-# Setup
+# Setup ![](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
 You need [premake](https://premake.github.io/)\
 There are 4 Configurations: `Debug` `Release` `SDL_Debug` `SDL_Release`\
 The SDL-Configurations include SDL for visual debugging.
 
 ## Windows
+![](https://img.shields.io/badge/Visual_Studio-5C2D91?style=for-the-badge&logo=visual%20studio&logoColor=white)
 ```
 cd vs-cpp
 premake5 vs2022
