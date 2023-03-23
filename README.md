@@ -40,7 +40,7 @@ The solver keeps track of the maximum score of the placed circles. If the maximu
 ---
 - Is it even good to restrict the selection further? The randomness accounted for a lot of the additional points we gained.
 - Calculate a score instead of sorting by one attribute after another.
-- Genetic algorithms would probably not lead to any great results because you can never say how it is going to play out in the end and even a little change can make big differences.
+- Genetic algorithms would probably not lead to good results because tiny changes can make big differences.
 
 # Setup ![](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
 You need [premake](https://premake.github.io/)\
